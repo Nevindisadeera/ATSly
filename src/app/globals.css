@@ -132,10 +132,20 @@
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --animate-ring-draw: ring-draw 900ms var(--ease-standard) both;
   --animate-bar-grow: bar-grow 600ms var(--ease-standard) both;
+  --animate-indeterminate: indeterminate 1.4s ease-in-out infinite;
 
   @keyframes ring-draw {
     from {
       stroke-dashoffset: var(--ring-circumference);
+    }
+  }
+
+  @keyframes indeterminate {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
     }
   }
 
