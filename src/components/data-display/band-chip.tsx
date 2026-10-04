@@ -16,7 +16,7 @@ export function BandChip({ band, children, className }: BandChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium",
+        "inline-flex h-6 w-fit items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium",
         TONE_CHIP_CLASSES[meta.tone],
         className,
       )}

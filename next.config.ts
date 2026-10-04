@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
-const isDev = process.env.NODE_ENV === "development";
-
-const nextConfig: NextConfig = {
+export default function nextConfig(phase: string): NextConfig {
   // Files named *.dev.tsx are routes only under `next dev` (e.g. the /design reference page).
-  // Production builds never see them.
-  pageExtensions: isDev ? ["dev.tsx", "tsx", "ts"] : ["tsx", "ts"],
-};
+  // Production builds never see them. Keyed on the phase rather than NODE_ENV, which is
+  // not yet set when a fresh dev server loads this file.
+  const isDevServer = phase === PHASE_DEVELOPMENT_SERVER;
 
-export default nextConfig;
+  return {
+    pageExtensions: isDevServer ? ["dev.tsx", "tsx", "ts"] : ["tsx", "ts"],
+  };
+}
