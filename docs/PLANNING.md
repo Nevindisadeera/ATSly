@@ -1237,20 +1237,38 @@ CI (GitHub Actions): typecheck, lint, unit + integration, build on every PR; E2E
 **Branching**
 
 - `main` is protected and always deployable. Vercel production deploys from `main`.
-- One branch per stage: `stage/01-project-init`, `stage/02-design-system`, … Fixes within a stage go on the same branch.
+- One branch per phase: `stage/01-project-init`, `stage/04-resume-upload-frontend`, `stage/04-resume-upload-backend`, … Fixes within a phase go on the same branch. Phase names and branch names come from the phase table in §28.
 - Merge via pull request with squash merge. PR title = Conventional Commit subject. Preview deployments per PR.
 - Tags: `v0.1.0` after Stage 8 (first end-to-end), `v0.2.0` after Stage 12, `v1.0.0` after Stage 15.
 
 **Commits.** Conventional Commits (`feat`, `fix`, `docs`, `chore`, `test`, `refactor`, `style`, `ci`). Scope = area (`feat(ats): add formatting checks`). Each stage yields 1–6 meaningful commits, not one giant commit and not fifty.
 
-**Stage protocol (binding for every stage ≥ 1)**
+**Phase protocol (binding for every phase after Stage 0)**
 
-1. State the stage goal and acceptance criteria before writing code.
-2. Implement only the stage scope. Note anything deferred.
-3. Run typecheck, lint, unit tests (and integration/E2E where defined). Report results verbatim, including failures.
-4. Show changed files grouped by area, with a short summary of decisions taken.
-5. Provide the Git commands: create branch (if new), `git add`, `git commit -m "<conventional message>"`, `git push -u origin <branch>`, and the PR title/body. **Never execute a push.**
-6. **STOP.** Continue only when the user says: "Push complete, continue."
+Features with both frontend and backend work are delivered as two separate phases, each committed and pushed on its own branch. Phases never mix unrelated scope. When a phase needs something that belongs to a later phase, it gets the smallest clean interface or stub, and the handoff explains why.
+
+1. **State the phase** in this form before writing code:
+   ```text
+   Phase:
+   Type: Frontend / Backend / Full-stack / Infrastructure
+   Goal:
+   Scope: IN SCOPE … / OUT OF SCOPE …
+   Acceptance criteria:
+   ```
+2. **Inspect existing code.** Read the project structure and every file the phase touches. Reuse what exists; do not rewrite working code. If an earlier phase's code must change, say why, which files, and what behavior changes.
+3. **Implement only the phase scope.** No new libraries unless the phase needs them.
+4. **Verify.** Run only scripts that exist in `package.json` (typecheck, lint, test, build as available). Frontend phases also verify responsive layout, loading, empty and error states, accessibility basics and keyboard navigation. Backend phases also verify request validation, response shape, error handling, ownership and edge cases with tests. Re-run checks for earlier phases to catch regressions.
+5. **Report** using this block, with failures stated honestly:
+   ```text
+   IMPLEMENTATION COMPLETE
+   Phase: / Type:
+   Implemented: …
+   Files changed: …
+   Tests/checks: typecheck · lint · tests · build — PASS/FAIL
+   Notes: …
+   ```
+6. **Git handoff.** Give the exact commands under Branch, Commit and Push headings: `git checkout -b <branch>` (only if not yet created), `git add <files>`, `git commit -m "<conventional message>"`, `git push -u origin <branch>`. **Never execute `git push`.** Read-only Git inspection is allowed.
+7. **STOP.** Continue only when the user says: "Push complete, continue."
 
 ## 28. Development stages
 
@@ -1274,6 +1292,35 @@ CI (GitHub Actions): typecheck, lint, unit + integration, build on every PR; E2E
 | 13 | Testing & hardening | Coverage gaps, E2E, a11y audit, Lighthouse | 2 d |
 | 14 | Documentation | README, architecture docs, screenshots, methodology page final | 1.5 d |
 | 15 | Production preparation | Security headers, rate limits, monitoring, Vercel/Atlas config, launch checklist | 1.5 d |
+
+### Phase breakdown (frontend and backend separated)
+
+Each row is one phase, one branch and one push. Frontend comes first by default. Backend comes first where the UI only displays data whose shape the backend defines; the reason is given in the table.
+
+| Phase | Type | Branch | Scope | Order note |
+|---|---|---|---|---|
+| 1 | Infrastructure | `stage/01-project-init` | Stage 1 deliverables | — |
+| 2 | Frontend | `stage/02-design-system` | Stage 2 deliverables | — |
+| 3 | Frontend | `stage/03-landing-page` | Stage 3 deliverables | Static pages only |
+| 4a | Frontend | `stage/04-resume-upload-frontend` | `/scan` step 1, `UploadDropzone`, `FileSummaryCard` (upload states only), client-side type/size validation, `useUpload` with XHR progress against a typed upload client, error copy from §24 | No API yet: the upload client targets the §22 contract and is exercised through a mock in tests |
+| 4b | Backend | `stage/04-resume-upload-backend` | `POST /api/resumes` validation (size, extension, MIME, magic bytes, page cap), typed errors, response envelope, IP rate limiter (in-memory), integration tests | Frontend from 4a starts calling the real route; no parsing |
+| 5a | Backend | `stage/05-resume-parsing-backend` | `lib/parsing`, taxonomy seed, fixtures, unit tests; `/api/resumes` returns the parsed summary | Backend first: the UI only shows what the parser produces |
+| 5b | Frontend | `stage/05-resume-parsing-frontend` | `FileSummaryCard` parsed state: pages, words, section chips, warnings, parse-error states | — |
+| 6 | Backend | `stage/06-mongodb-persistence` | Stage 6 deliverables | No UI |
+| 7a | Backend | `stage/07-ats-engine` | `lib/ats` checks, scoring, bands, headline, taxonomy lexicons, unit tests | Pure engine, no I/O |
+| 7b | Backend | `stage/07-scan-api` | `scan-service`, `scan-pipeline` (ATS stage only), `POST /api/scans` with `after()`, `GET /api/scans/:id`, status route, stale sweep, integration tests | Results UI in Phase 8 needs these routes |
+| 8 | Frontend | `stage/08-results-page` | Stage 8 deliverables, `/scan` step 3 wiring | Tag `v0.1.0` after merge |
+| 9a | Backend | `stage/09-job-matching-backend` | `job-service`, rules extraction, `lib/matching` tiers, fit, aggregation; `POST /api/scans` accepts a job description | Backend first: match report shape drives the UI |
+| 9b | Frontend | `stage/09-job-matching-frontend` | `/scan` step 2, `JobDescriptionInput`, `MatchSection`, `MatchBreakdown`, `/scan?resume=` re-scan | — |
+| 10a | Backend | `stage/10-ai-analysis-backend` | `lib/ai` provider (OpenAI and mock), schemas, prompts, three tasks, evidence verification, cache, budget, Q07, semantic tier, eval script | Backend first: recommendations UI renders AI output |
+| 10b | Frontend | `stage/10-ai-analysis-frontend` | `RecommendationsSection`, `RecommendationCard`, AI status and degraded states, strong/weak match evidence | — |
+| 11a | Backend | `stage/11-auth-backend` | Auth.js config, `POST /api/auth/register`, password hashing, `proxy.ts` redirects and origin checks, guest claim, login rate limits, tests | Backend first: forms post to these endpoints |
+| 11b | Frontend | `stage/11-auth-frontend` | `/login`, `/register`, app header account menu, `GuestBanner`, claim notice | — |
+| 12a | Backend | `stage/12-dashboard-backend` | `dashboard-service`, `GET /api/scans` with cursor, `DELETE /api/scans/:id`, `DELETE /api/account`, cascade tests | Backend first: dashboard reads these |
+| 12b | Frontend | `stage/12-dashboard-frontend` | `/dashboard`, `/settings`, `ScoreTrendChart`, delete dialogs, empty states | — |
+| 13 | Full-stack | `stage/13-testing-hardening` | Stage 13 deliverables | Cross-cutting |
+| 14 | Documentation | `stage/14-documentation` | Stage 14 deliverables | — |
+| 15 | Infrastructure | `stage/15-production-prep` | Stage 15 deliverables | Tag `v1.0.0` |
 
 ### Stage details
 
