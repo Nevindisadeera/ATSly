@@ -12,6 +12,7 @@ import {
   SectionHeading,
   SeverityDot,
 } from "@/components/data-display";
+import { KeywordChipWithTooltip } from "@/components/data-display/keyword-chip-tooltip";
 import {
   Accordion,
   AccordionContent,
@@ -420,7 +421,7 @@ export default function DesignSystemPage() {
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            <KeywordChip
+            <KeywordChipWithTooltip
               term="TypeScript"
               state="matched"
               importance="required"
@@ -429,12 +430,12 @@ export default function DesignSystemPage() {
             <KeywordChip term="React" state="matched" importance="required" />
             <KeywordChip term="GraphQL" state="missing" importance="required" />
             <KeywordChip term="Kubernetes" state="missing" importance="preferred" />
-            <KeywordChip
+            <KeywordChipWithTooltip
               term="PostgreSQL"
               state="backed"
               tooltip="Also used in 2 experience bullets"
             />
-            <KeywordChip
+            <KeywordChipWithTooltip
               term="Figma"
               state="listed"
               tooltip="Listed in Skills but not mentioned in experience"

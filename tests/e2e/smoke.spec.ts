@@ -4,5 +4,7 @@ test("home page renders", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/ATSly/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("heading", { level: 1, name: "ATSly" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: /Make your resume ATS/ }),
+  ).toBeVisible();
 });

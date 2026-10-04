@@ -1,11 +1,9 @@
 import { Check, Plus } from "lucide-react";
 import { cn } from "cn";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
 export type KeywordChipState = "matched" | "missing" | "backed" | "listed";
 
-type KeywordChipProps = {
+export type KeywordChipProps = {
   term: string;
   /**
    * matched: found in the resume (job match). missing: required by the job but not found.
@@ -13,8 +11,6 @@ type KeywordChipProps = {
    */
   state: KeywordChipState;
   importance?: "required" | "preferred";
-  /** Optional detail, e.g. match type and evidence. Makes the chip focusable. */
-  tooltip?: React.ReactNode;
   className?: string;
 };
 
@@ -32,31 +28,35 @@ const STATE_SR_TEXT: Record<KeywordChipState, string> = {
   listed: "listed only",
 };
 
-export function KeywordChip({
+export function keywordChipClasses(state: KeywordChipState, className?: string) {
+  return cn(
+    "inline-flex h-7 max-w-full items-center gap-1.5 rounded-sm border px-2.5 text-sm font-medium",
+    STATE_CLASSES[state],
+    className,
+  );
+}
+
+/** Icon, term, preferred marker and screen-reader state, shared by both chip variants. */
+export function KeywordChipContent({
   term,
   state,
   importance,
-  tooltip,
-  className,
-}: KeywordChipProps) {
-  const icon =
-    state === "matched" || state === "backed" ? (
-      <Check
-        aria-hidden="true"
-        className="size-3.5 text-success-strong"
-        strokeWidth={2}
-      />
-    ) : state === "missing" ? (
-      <Plus
-        aria-hidden="true"
-        className="size-3.5 text-muted-foreground"
-        strokeWidth={2}
-      />
-    ) : null;
-
-  const content = (
+}: Pick<KeywordChipProps, "term" | "state" | "importance">) {
+  return (
     <>
-      {icon}
+      {state === "matched" || state === "backed" ? (
+        <Check
+          aria-hidden="true"
+          className="size-3.5 text-success-strong"
+          strokeWidth={2}
+        />
+      ) : state === "missing" ? (
+        <Plus
+          aria-hidden="true"
+          className="size-3.5 text-muted-foreground"
+          strokeWidth={2}
+        />
+      ) : null}
       <span>{term}</span>
       {importance === "preferred" ? (
         <span className="text-xs font-normal text-muted-foreground">preferred</span>
@@ -67,33 +67,13 @@ export function KeywordChip({
       </span>
     </>
   );
+}
 
-  const classes = cn(
-    "inline-flex h-7 max-w-full items-center gap-1.5 rounded-sm border px-2.5 text-sm font-medium",
-    STATE_CLASSES[state],
-    className,
-  );
-
-  if (!tooltip) {
-    return <span className={classes}>{content}</span>;
-  }
-
+/** Static keyword chip. For a chip with a detail tooltip, use KeywordChipWithTooltip. */
+export function KeywordChip({ term, state, importance, className }: KeywordChipProps) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            classes,
-            "cursor-default outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          )}
-        >
-          {content}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={6}>
-        {tooltip}
-      </TooltipContent>
-    </Tooltip>
+    <span className={keywordChipClasses(state, className)}>
+      <KeywordChipContent term={term} state={state} importance={importance} />
+    </span>
   );
 }

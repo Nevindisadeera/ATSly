@@ -1,28 +1,36 @@
-import type { Metadata } from "next";
-import { GeistMono } from "geist/font/mono";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { site } from "@/lib/config/site";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.url),
   title: {
-    default: "ATSly — ATS resume analysis",
-    template: "%s · ATSly",
+    default: `${site.name} — Make your resume ATS-ready`,
+    template: `%s · ${site.name}`,
   },
-  description:
-    "Analyze your resume, uncover missing keywords, and understand how well it matches your target role.",
+  description: site.description,
+  applicationName: site.name,
+  openGraph: {
+    type: "website",
+    siteName: site.name,
+    title: `${site.name} — Make your resume ATS-ready`,
+    description: site.description,
+    url: "/",
+  },
+  twitter: { card: "summary_large_image" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col">
-        <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
-      </body>
+    <html lang="en" className={`${GeistSans.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
