@@ -10,6 +10,8 @@ export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  /** Uploads allowed per IP address per hour (Phase 4b). */
+  RATE_LIMIT_UPLOADS_PER_HOUR: z.coerce.number().int().positive().default(15),
 });
 
 export type Env = z.infer<typeof envSchema>;

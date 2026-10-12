@@ -8,6 +8,7 @@ describe("parseEnv", () => {
       NODE_ENV: "development",
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
       LOG_LEVEL: "info",
+      RATE_LIMIT_UPLOADS_PER_HOUR: 15,
     });
   });
 
@@ -19,6 +20,15 @@ describe("parseEnv", () => {
     });
     expect(env.NEXT_PUBLIC_APP_URL).toBe("https://atsly.app");
     expect(env.LOG_LEVEL).toBe("warn");
+  });
+
+  it("coerces numeric limits from strings", () => {
+    expect(
+      parseEnv({ RATE_LIMIT_UPLOADS_PER_HOUR: "40" }).RATE_LIMIT_UPLOADS_PER_HOUR,
+    ).toBe(40);
+    expect(() => parseEnv({ RATE_LIMIT_UPLOADS_PER_HOUR: "0" })).toThrow(
+      /RATE_LIMIT_UPLOADS_PER_HOUR/,
+    );
   });
 
   it("names every invalid variable in the error", () => {

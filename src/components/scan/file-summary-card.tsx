@@ -80,7 +80,7 @@ export function FileSummaryCard({
         className,
       )}
     >
-      <div className="flex items-start gap-4">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
         <span
           aria-hidden="true"
           className={cn(
@@ -93,7 +93,7 @@ export function FileSummaryCard({
           <FileText className="size-5" strokeWidth={1.75} />
         </span>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           <p className="truncate font-medium text-foreground" title={file?.name}>
             {file?.name ?? "No file selected"}
           </p>
@@ -123,7 +123,8 @@ export function FileSummaryCard({
           </p>
         </div>
 
-        <div className="shrink-0">
+        {/* Below the file name on phones so the name keeps the full width. */}
+        <div className="col-start-2 mt-2 -ml-3 sm:col-start-3 sm:row-start-1 sm:mt-0 sm:ml-0">
           {busy ? (
             <Button variant="ghost" size="sm" onClick={onCancel}>
               Cancel

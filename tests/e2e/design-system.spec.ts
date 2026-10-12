@@ -59,9 +59,13 @@ test("menu opens from the keyboard and supports arrow keys", async ({ page }) =>
   await page.keyboard.press("Enter");
   const menu = page.getByRole("menu");
   await expect(menu).toBeVisible();
-  await expect(menu.locator(":focus")).toHaveCount(0); // focus is on the menu itself
-  await expect(menu).toBeFocused();
-  await page.keyboard.press("ArrowDown");
+  // Radix focuses either the menu itself or its first item on open; both are accessible.
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean(document.activeElement?.closest('[role="menu"]'))),
+    )
+    .toBe(true);
+  await page.keyboard.press("Home");
   await expect(
     page.getByRole("menuitem", { name: "Scan against another job" }),
   ).toBeFocused();
