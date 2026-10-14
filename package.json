@@ -15,13 +15,15 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "fixtures:pdf": "node scripts/fixtures/build-resume-pdfs.mjs",
-    "taxonomy:build": "node scripts/taxonomy/build-skills.mjs"
+    "taxonomy:build": "node scripts/taxonomy/build-skills.mjs",
+    "db:local": "node scripts/dev/local-mongo.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "geist": "^1.7.2",
     "lucide-react": "^1.51.0",
+    "mongoose": "^9.11.2",
     "next": "16.3.8",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
@@ -41,6 +43,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "mongodb-memory-server": "^11.3.0",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
@@ -49,6 +52,6 @@
     "vitest": "^5.0.3"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=20.19.0"
   }
 }

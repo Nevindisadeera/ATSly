@@ -17,11 +17,19 @@ export function newRequestId(): string {
 export function jsonSuccess<T>(
   data: T,
   requestId: string,
-  init: { status?: number } = {},
+  init: { status?: number; headers?: Record<string, string> } = {},
 ): Response {
   const body: ApiSuccessBody<T> = { data };
   return Response.json(body, {
     status: init.status ?? 200,
+    headers: { ...BASE_HEADERS, ...init.headers, "X-Request-Id": requestId },
+  });
+}
+
+/** 204 for successful deletes. */
+export function noContent(requestId: string): Response {
+  return new Response(null, {
+    status: 204,
     headers: { ...BASE_HEADERS, "X-Request-Id": requestId },
   });
 }

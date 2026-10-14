@@ -138,3 +138,29 @@ test("the server rejects a password-protected Word document", async ({ page }) =
     SERVER,
   );
 });
+
+test("the uploaded resume belongs to this browser only", async ({ page, browser }) => {
+  const uploaded = page.waitForResponse(
+    (r) => r.url().endsWith("/api/resumes") && r.request().method() === "POST",
+    SERVER,
+  );
+  await page
+    .locator('input[type="file"]')
+    .setInputFiles(fixture("clean-single-column.pdf"));
+  const response = await uploaded;
+  expect(response.status()).toBe(201);
+  const { data } = await response.json();
+
+  // The guest cookie set by the upload lets this browser read its resume.
+  const own = await page.request.get(`/api/resumes/${data.id}`);
+  expect(own.status()).toBe(200);
+  expect((await own.json()).data.parsed.contact.name).toBe("Jordan Rivera");
+
+  // A different browser (no cookie) gets 404, as if the resume didn't exist.
+  const stranger = await browser.newContext();
+  const other = await stranger.request.get(
+    `${page.url().replace("/scan", "")}/api/resumes/${data.id}`,
+  );
+  expect(other.status()).toBe(404);
+  await stranger.close();
+});

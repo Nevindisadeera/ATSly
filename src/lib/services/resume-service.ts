@@ -1,20 +1,30 @@
-import { createHash, randomBytes } from "node:crypto";
+import "server-only";
 
+import { createHash } from "node:crypto";
+
+import type { Owner } from "@/lib/auth/owner";
 import { UPLOAD_LIMITS } from "@/lib/config/limits";
+import { MAX_STORED_TEXT } from "@/lib/db/models/resume";
+import {
+  resumeRepository,
+  type StoredResume,
+} from "@/lib/db/repositories/resume-repository";
 import { AppError } from "@/lib/http/errors";
 import { logger } from "@/lib/logging/logger";
 import {
   analyzeDocument,
   ParseError,
+  PARSER_VERSION,
   type DocumentAnalysis,
   type ParsedResume,
 } from "@/lib/parsing";
 import { checkFileSignature } from "@/lib/security/file-signature";
 import { checkResumeFile } from "@/lib/validation/upload";
-import type { ResumeUploadResult } from "@/types/api";
+import type { ResumeDetail, ResumeUploadResult } from "@/types/api";
 
 /** Parsing budget; the route's maxDuration leaves headroom above this. */
 const PARSE_TIMEOUT_MS = 15_000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type IncomingResumeFile = {
   name: string;
@@ -23,6 +33,8 @@ export type IncomingResumeFile = {
   bytes: Buffer;
 };
 
+type Context = { requestId: string; owner: Owner };
+
 /** Strips path segments and control characters from a client-supplied file name. */
 export function sanitizeFileName(name: string): string {
   const base = name.split(/[\\/]/).pop() ?? "";
@@ -30,14 +42,20 @@ export function sanitizeFileName(name: string): string {
   return (cleaned || "resume").slice(0, 200);
 }
 
+/** Guest data is deleted after GUEST_RETENTION_DAYS; account data is kept. */
+function expiryFor(owner: Owner): Date | null {
+  if (owner.type !== "guest") return null;
+  const days = Number(process.env.GUEST_RETENTION_DAYS) || 7;
+  return new Date(Date.now() + days * DAY_MS);
+}
+
 /**
- * Validates and parses an uploaded resume, returning a summary for the upload step.
- * Persistence and real ids arrive in Phase 6; until then `id` is a random 24-character
- * hex value in the same format as a MongoDB ObjectId.
+ * Validates, parses and stores an uploaded resume for its owner. The same file uploaded
+ * again by the same owner returns the stored resume without parsing it again.
  */
 export async function acceptResumeUpload(
   file: IncomingResumeFile,
-  context: { requestId: string },
+  context: Context,
 ): Promise<ResumeUploadResult> {
   const fileName = sanitizeFileName(file.name);
 
@@ -47,9 +65,7 @@ export async function acceptResumeUpload(
     size: file.bytes.length,
     type: file.type,
   });
-  if (!check.ok) {
-    throw new AppError(check.code);
-  }
+  if (!check.ok) throw new AppError(check.code);
 
   const signature = checkFileSignature(file.bytes, check.extension);
   if (!signature.ok) {
@@ -63,10 +79,92 @@ export async function acceptResumeUpload(
     throw new AppError(signature.code);
   }
 
+  const sha256 = createHash("sha256").update(file.bytes).digest("hex");
+  const duplicate = await resumeRepository.findDuplicate(
+    context.owner,
+    sha256,
+    PARSER_VERSION,
+  );
+  if (duplicate) {
+    const expiresAt = expiryFor(context.owner);
+    if (expiresAt)
+      await resumeRepository.extendExpiry(context.owner, duplicate.id, expiresAt);
+    logger.info("resume.reused", {
+      requestId: context.requestId,
+      resumeId: duplicate.id,
+    });
+    return toUploadResult({
+      ...duplicate,
+      file: { ...duplicate.file, originalName: fileName },
+    });
+  }
+
   const started = Date.now();
-  let analysis: DocumentAnalysis;
+  const analysis = await parse(file.bytes, check.extension, context.requestId);
+  const { parsed, extraction, warnings, text } = analysis;
+
+  const stored = await resumeRepository.create({
+    owner: context.owner,
+    expiresAt: expiryFor(context.owner),
+    file: {
+      originalName: fileName,
+      extension: check.extension,
+      mimeType: file.type,
+      sizeBytes: file.bytes.length,
+      sha256,
+      pageCount: extraction.pageCount,
+    },
+    extraction: {
+      engine: extraction.format === "pdf" ? "pdfjs" : "ooxml",
+      text: text.slice(0, MAX_STORED_TEXT),
+      wordCount: parsed.stats.wordCount,
+      charCount: text.length,
+      warnings,
+      layout: extraction.layout,
+    },
+    parsed,
+    parserVersion: PARSER_VERSION,
+    language: parsed.meta.language,
+  });
+
+  logger.info("resume.accepted", {
+    requestId: context.requestId,
+    resumeId: stored.id,
+    ownerType: context.owner.type,
+    extension: check.extension,
+    sizeBytes: file.bytes.length,
+    pages: extraction.pageCount,
+    words: parsed.stats.wordCount,
+    sections: parsed.sections.length,
+    parseMs: Date.now() - started,
+  });
+  return toUploadResult(stored);
+}
+
+export async function getResumeForOwner(owner: Owner, id: string): Promise<ResumeDetail> {
+  const resume = await resumeRepository.findForOwner(owner, id);
+  if (!resume) throw new AppError("NOT_FOUND");
+  return {
+    ...toUploadResult(resume),
+    createdAt: resume.createdAt.toISOString(),
+    expiresAt: resume.expiresAt?.toISOString() ?? null,
+    parsed: resume.parsed,
+  };
+}
+
+export async function deleteResumeForOwner(owner: Owner, id: string): Promise<void> {
+  // Phase 7b also deletes the resume's scans here.
+  const deleted = await resumeRepository.deleteForOwner(owner, id);
+  if (!deleted) throw new AppError("NOT_FOUND");
+}
+
+async function parse(
+  bytes: Buffer,
+  extension: "pdf" | "docx",
+  requestId: string,
+): Promise<DocumentAnalysis> {
   try {
-    analysis = await analyzeDocument(file.bytes, check.extension, {
+    return await analyzeDocument(bytes, extension, {
       maxPages: UPLOAD_LIMITS.maxPages,
       asOf: new Date(),
       timeoutMs: PARSE_TIMEOUT_MS,
@@ -74,45 +172,34 @@ export async function acceptResumeUpload(
   } catch (error) {
     if (error instanceof ParseError) {
       logger.info("resume.rejected", {
-        requestId: context.requestId,
+        requestId,
         code: error.code,
         reason: error.reason,
-        extension: check.extension,
-        sizeBytes: file.bytes.length,
+        extension,
+        sizeBytes: bytes.length,
       });
       throw new AppError(error.code);
     }
     // An unexpected parser failure on unusual input is still "we couldn't read this file".
     logger.error("resume.parse_crashed", {
-      requestId: context.requestId,
-      extension: check.extension,
+      requestId,
+      extension,
       errorName: error instanceof Error ? error.name : typeof error,
     });
     throw new AppError("PARSE_FAILED", { cause: error });
   }
+}
 
-  const { parsed, extraction, warnings } = analysis;
-  const sha256 = createHash("sha256").update(file.bytes).digest("hex");
-  logger.info("resume.accepted", {
-    requestId: context.requestId,
-    extension: check.extension,
-    sizeBytes: file.bytes.length,
-    sha256Prefix: sha256.slice(0, 12),
-    pages: extraction.pageCount,
-    words: parsed.stats.wordCount,
-    sections: parsed.sections.length,
-    parseMs: Date.now() - started,
-  });
-
+function toUploadResult(resume: StoredResume): ResumeUploadResult {
   return {
-    id: randomBytes(12).toString("hex"),
-    fileName,
-    extension: check.extension,
-    sizeBytes: file.bytes.length,
-    pageCount: extraction.pageCount,
-    wordCount: parsed.stats.wordCount,
-    sections: summarizeSections(parsed.sections),
-    warnings,
+    id: resume.id,
+    fileName: resume.file.originalName,
+    extension: resume.file.extension,
+    sizeBytes: resume.file.sizeBytes,
+    pageCount: resume.file.pageCount,
+    wordCount: resume.extraction.wordCount,
+    sections: summarizeSections(resume.parsed.sections),
+    warnings: resume.extraction.warnings,
   };
 }
 

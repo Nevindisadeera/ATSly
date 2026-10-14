@@ -55,3 +55,14 @@ export type ResumeUploadResult = {
   sections: { kind: ResumeSectionKind; confidence: number }[];
   warnings: string[];
 };
+
+/**
+ * Response of GET /api/resumes/:id — the upload summary plus the parsed resume.
+ * The raw extracted text is never returned.
+ */
+export type ResumeDetail = ResumeUploadResult & {
+  createdAt: string;
+  /** When a guest-owned resume will be deleted; null for account-owned resumes. */
+  expiresAt: string | null;
+  parsed: import("@/lib/parsing/types").ParsedResume;
+};

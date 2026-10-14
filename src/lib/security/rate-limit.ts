@@ -1,9 +1,7 @@
 /**
- * Fixed-window rate limiter kept in memory.
- *
- * Phase 4b scope: counters live per server instance, so on serverless platforms each
- * instance counts separately. Phase 6 replaces the store with MongoDB so limits hold
- * across instances (docs/PLANNING.md §16.6). The interface stays the same.
+ * Fixed-window rate limiting. The interface is shared by the in-memory limiter (unit tests,
+ * single-process use) and the MongoDB limiter used in the app (rate-limit-mongo.ts), whose
+ * counters hold across serverless instances — docs/PLANNING.md §16.6.
  */
 
 export type RateLimitResult = {
@@ -15,8 +13,8 @@ export type RateLimitResult = {
 };
 
 export interface RateLimiter {
-  consume(key: string): RateLimitResult;
-  reset(): void;
+  consume(key: string): Promise<RateLimitResult>;
+  reset(): Promise<void>;
 }
 
 type Window = { start: number; count: number };
@@ -38,7 +36,7 @@ export function createMemoryRateLimiter(options: {
   };
 
   return {
-    consume(key) {
+    async consume(key) {
       const time = now();
       let w = windows.get(key);
       if (!w || time - w.start >= windowMs) {
@@ -56,7 +54,7 @@ export function createMemoryRateLimiter(options: {
       w.count += 1;
       return { allowed: true, limit, remaining: limit - w.count, retryAfterSeconds };
     },
-    reset() {
+    async reset() {
       windows.clear();
     },
   };
