@@ -8,3 +8,4 @@ next-env.d.ts
 docs/PLANNING.md
 AGENTS.md
 CLAUDE.md
+src/lib/taxonomy/skills.json
