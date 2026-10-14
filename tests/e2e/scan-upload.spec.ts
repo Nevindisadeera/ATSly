@@ -102,9 +102,15 @@ test("shows section chips and warnings when the server returns them", async ({
   await fileInput(page).setInputFiles(pdf());
   const card = page.getByRole("region", { name: "Selected file" });
   await expect(card.getByText("2 pages · 540 words")).toBeVisible();
-  await expect(
-    card.getByRole("list", { name: "Sections found" }).getByRole("listitem"),
-  ).toHaveCount(3);
+  // Core sections are always listed; Summary wasn't found, so it's marked as missing.
+  const sections = card.getByRole("list", { name: "Sections" }).getByRole("listitem");
+  await expect(sections).toHaveText([
+    "Experience, found",
+    "Education, found",
+    "Skills, found",
+    "Summary, not found",
+  ]);
+  await expect(card.getByText(/weren't found/)).toBeVisible();
   await expect(card.getByText(/very little text on page 2/)).toBeVisible();
 });
 
@@ -295,7 +301,7 @@ test.describe("accessibility and layout", () => {
     expect(await scan(page)).toEqual([]);
   });
 
-  test("ready and server error states have no violations", async ({ page }) => {
+  test("server error state has no violations", async ({ page }) => {
     await mockUpload(page, (route) =>
       route.fulfill({
         status: 422,
@@ -304,6 +310,34 @@ test.describe("accessibility and layout", () => {
     );
     await fileInput(page).setInputFiles(pdf());
     await expect(page.getByRole("status")).toHaveText("Upload failed");
+    expect(await scan(page)).toEqual([]);
+  });
+
+  test("ready state with found and missing sections has no violations", async ({
+    page,
+  }) => {
+    await mockUpload(page, (route) =>
+      route.fulfill({
+        status: 201,
+        json: {
+          data: {
+            ...SUCCESS_BODY.data,
+            pageCount: 1,
+            wordCount: 320,
+            sections: [
+              { kind: "experience", confidence: 0.95 },
+              { kind: "projects", confidence: 0.95 },
+            ],
+            warnings: [
+              "Page 2 looks like an image. ATS systems may not be able to read its text.",
+            ],
+          },
+        },
+      }),
+    );
+    await fileInput(page).setInputFiles(pdf());
+    await expect(page.getByRole("status")).toHaveText("Ready");
+    await expect(page.getByText("Summary, not found")).toBeAttached();
     expect(await scan(page)).toEqual([]);
   });
 

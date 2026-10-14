@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { UploadState } from "@/hooks/use-upload";
 import { formatBytes, pluralize } from "@/lib/utils/format";
-import type { ResumeSectionKind } from "@/types/api";
 
+import { SectionChecklist } from "./section-checklist";
 import { uploadErrorMessage } from "./upload-messages";
 
 type ActiveState = Exclude<UploadState, { phase: "idle" }>;
@@ -22,16 +22,6 @@ type FileSummaryCardProps = {
   /** Receives focus when the card replaces the dropzone. */
   ref?: React.Ref<HTMLElement>;
   className?: string;
-};
-
-const SECTION_LABELS: Partial<Record<ResumeSectionKind, string>> = {
-  summary: "Summary",
-  experience: "Experience",
-  education: "Education",
-  skills: "Skills",
-  projects: "Projects",
-  certifications: "Certifications",
-  languages: "Languages",
 };
 
 function statusLine(state: ActiveState): string {
@@ -150,24 +140,7 @@ export function FileSummaryCard({
         </div>
       ) : null}
 
-      {result && result.sections.length > 0 ? (
-        <ul aria-label="Sections found" className="mt-5 flex flex-wrap gap-2">
-          {result.sections
-            .filter((s) => SECTION_LABELS[s.kind])
-            .map((s) => (
-              <li
-                key={s.kind}
-                className="inline-flex h-7 items-center gap-1.5 rounded-sm border border-border bg-soft px-2.5 text-sm text-foreground"
-              >
-                <CircleCheck
-                  aria-hidden="true"
-                  className="size-3.5 text-success-strong"
-                />
-                {SECTION_LABELS[s.kind]}
-              </li>
-            ))}
-        </ul>
-      ) : null}
+      {result ? <SectionChecklist sections={result.sections} className="mt-5" /> : null}
 
       {result && result.warnings.length > 0 ? (
         <ul className="mt-5 grid gap-2">
