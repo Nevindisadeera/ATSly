@@ -11,5 +11,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/unit/**/*.test.ts", "tests/integration/**/*.test.ts"],
+    setupFiles: ["tests/support/setup-env.ts"],
+    // The first run downloads a MongoDB binary for the in-memory test database.
+    hookTimeout: 120_000,
   },
 });

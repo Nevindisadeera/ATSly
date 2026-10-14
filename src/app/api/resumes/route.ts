@@ -1,3 +1,4 @@
+import { resolveOwner } from "@/lib/auth/guest";
 import { UPLOAD_LIMITS } from "@/lib/config/limits";
 import { AppError } from "@/lib/http/errors";
 import { jsonError, jsonSuccess, newRequestId } from "@/lib/http/respond";
@@ -73,7 +74,9 @@ async function readFilePart(request: Request, body: Buffer) {
 export async function POST(request: Request): Promise<Response> {
   const requestId = newRequestId();
   try {
-    const rate = uploadRateLimiter.consume(`upload:ip:${clientAddress(request.headers)}`);
+    const rate = await uploadRateLimiter.consume(
+      `upload:ip:${clientAddress(request.headers)}`,
+    );
     if (!rate.allowed) {
       throw new AppError("RATE_LIMITED", {
         headers: { "Retry-After": String(rate.retryAfterSeconds) },
@@ -82,8 +85,13 @@ export async function POST(request: Request): Promise<Response> {
 
     const body = await readBodyWithLimit(request, MAX_BODY_BYTES);
     const file = await readFilePart(request, body);
-    const result = await acceptResumeUpload(file, { requestId });
-    return jsonSuccess(result, requestId, { status: 201 });
+    // The guest identity is issued on the first upload, never just for visiting the site.
+    const { owner, setCookie } = resolveOwner(request, { create: true });
+    const result = await acceptResumeUpload(file, { requestId, owner });
+    return jsonSuccess(result, requestId, {
+      status: 201,
+      headers: setCookie ? { "Set-Cookie": setCookie } : undefined,
+    });
   } catch (error) {
     return jsonError(error, requestId, ROUTE);
   }

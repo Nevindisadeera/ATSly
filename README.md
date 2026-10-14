@@ -10,20 +10,25 @@ Next.js 16 · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Zod · V
 
 ## Getting started
 
-Requires Node.js 20.9 or later.
+Requires Node.js 20.19 or later.
 
 ```bash
 npm install
-cp .env.example .env.local
-npm run dev
+cp .env.example .env.local   # then set AUTH_SECRET (the file explains how)
+npm run db:local             # terminal 1: local MongoDB, no install needed
+npm run dev                  # terminal 2
 ```
 
 Open http://localhost:3000.
+
+`npm run db:local` keeps its data in `.data/mongo`. If you already run MongoDB on port 27017,
+or use MongoDB Atlas, point `MONGODB_URI` at it instead.
 
 ## Scripts
 
 | Script                            | Purpose                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------- |
+| `npm run db:local`                | Local MongoDB for development (data in `.data/mongo`)                     |
 | `npm run dev`                     | Start the development server                                              |
 | `npm run build`                   | Production build                                                          |
 | `npm run start`                   | Serve the production build                                                |

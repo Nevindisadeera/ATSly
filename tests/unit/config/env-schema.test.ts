@@ -9,6 +9,7 @@ describe("parseEnv", () => {
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
       LOG_LEVEL: "info",
       RATE_LIMIT_UPLOADS_PER_HOUR: 15,
+      GUEST_RETENTION_DAYS: 7,
     });
   });
 
@@ -29,6 +30,18 @@ describe("parseEnv", () => {
     expect(() => parseEnv({ RATE_LIMIT_UPLOADS_PER_HOUR: "0" })).toThrow(
       /RATE_LIMIT_UPLOADS_PER_HOUR/,
     );
+  });
+
+  it("validates the database URI and cookie secret", () => {
+    expect(
+      parseEnv({ MONGODB_URI: "mongodb+srv://u:p@cluster0.example.net/atsly" })
+        .MONGODB_URI,
+    ).toMatch(/^mongodb\+srv:/);
+    expect(() => parseEnv({ MONGODB_URI: "postgres://localhost/atsly" })).toThrow(
+      /MONGODB_URI/,
+    );
+    expect(() => parseEnv({ AUTH_SECRET: "too-short" })).toThrow(/AUTH_SECRET/);
+    expect(parseEnv({ AUTH_SECRET: "x".repeat(32) }).AUTH_SECRET).toHaveLength(32);
   });
 
   it("names every invalid variable in the error", () => {

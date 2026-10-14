@@ -1,17 +1,17 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { POST } from "@/app/api/resumes/route";
 import { UPLOAD_LIMITS } from "@/lib/config/limits";
-import { uploadRateLimiter } from "@/lib/security/upload-limiter";
 
 import {
   encryptedOfficeContainer,
   minimalDocx,
   minimalPdf,
 } from "../../support/documents";
+import { setupTestDatabase } from "../../support/database";
 
 const ENDPOINT = "http://localhost:3000/api/resumes";
 const PDF = UPLOAD_LIMITS.mimeTypes.pdf;
@@ -37,7 +37,8 @@ async function call(request: Request) {
   return { response, body: await response.json() };
 }
 
-beforeEach(() => uploadRateLimiter.reset());
+// Each test starts with empty collections, which also resets rate-limit counters.
+setupTestDatabase();
 
 describe("POST /api/resumes — accepted uploads", () => {
   it("accepts a PDF and returns the planned response shape", async () => {
