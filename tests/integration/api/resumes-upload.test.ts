@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { POST } from "@/app/api/resumes/route";
@@ -47,11 +50,40 @@ describe("POST /api/resumes — accepted uploads", () => {
       fileName: "Jane Doe Resume.pdf",
       extension: "pdf",
       sizeBytes: minimalPdf().length,
-      pageCount: null,
-      wordCount: null,
-      sections: [],
+      pageCount: 1,
+      wordCount: expect.any(Number),
+      sections: [{ kind: "experience", confidence: 0.95 }],
       warnings: [],
     });
+    expect(body.data.wordCount).toBeGreaterThan(20);
+  });
+
+  it("returns real page counts, sections and warnings from a realistic resume", async () => {
+    const bytes = readFileSync(
+      join(process.cwd(), "tests/fixtures/resumes/clean-single-column.pdf"),
+    );
+    const { response, body } = await call(
+      uploadRequest([{ name: "resume.pdf", type: PDF, bytes }]),
+    );
+    expect(response.status).toBe(201);
+    expect(body.data.pageCount).toBe(1);
+    expect(body.data.sections.map((s: { kind: string }) => s.kind).sort()).toEqual([
+      "certifications",
+      "education",
+      "experience",
+      "skills",
+      "summary",
+    ]);
+    expect(body.data.warnings).toEqual([]);
+  });
+
+  it("accepts a PDF that restricts copying but opens without a password", async () => {
+    const { response } = await call(
+      uploadRequest([
+        { name: "a.pdf", type: PDF, bytes: minimalPdf({ encrypted: true }) },
+      ]),
+    );
+    expect(response.status).toBe(201);
   });
 
   it("accepts a DOCX, including when the browser sends no MIME type", async () => {
@@ -126,6 +158,38 @@ describe("POST /api/resumes — rejected uploads", () => {
       part: { name: "resume.pdf", type: PDF, bytes: minimalPdf({ truncated: true }) },
       status: 422,
       code: "PARSE_FAILED",
+    },
+    {
+      title: "a PDF that needs a password to open",
+      part: {
+        name: "resume.pdf",
+        type: PDF,
+        bytes: minimalPdf({ userPassword: "secret" }),
+      },
+      status: 422,
+      code: "ENCRYPTED_DOCUMENT",
+    },
+    {
+      title: "a PDF over the 10-page limit",
+      part: { name: "resume.pdf", type: PDF, bytes: minimalPdf({ pages: 11 }) },
+      status: 422,
+      code: "TOO_MANY_PAGES",
+    },
+    {
+      title: "a scanned PDF with no text layer",
+      part: {
+        name: "resume.pdf",
+        type: PDF,
+        bytes: readFileSync(join(process.cwd(), "tests/fixtures/resumes/scanned.pdf")),
+      },
+      status: 422,
+      code: "EMPTY_DOCUMENT",
+    },
+    {
+      title: "a PDF with almost no text",
+      part: { name: "resume.pdf", type: PDF, bytes: minimalPdf({ lines: ["Jane Doe"] }) },
+      status: 422,
+      code: "EMPTY_DOCUMENT",
     },
     {
       title: "an empty file",

@@ -6,6 +6,8 @@ import { encryptedOfficeContainer, minimalDocx, minimalPdf } from "../support/do
 
 // End-to-end against the real POST /api/resumes (no mocks).
 // Each test uses its own client address so local re-runs don't hit the hourly rate limit.
+// The first request in dev mode compiles the route and pdf.js, so results get a longer wait.
+const SERVER = { timeout: 30_000 };
 test.beforeEach(async ({ page }) => {
   const ip = `198.18.${randomBytes(1)[0]}.${randomBytes(1)[0]}`;
   await page.setExtraHTTPHeaders({ "x-forwarded-for": ip });
@@ -20,8 +22,13 @@ test("uploads a real PDF and shows it as ready", async ({ page }) => {
     buffer: minimalPdf(),
   });
   const card = page.getByRole("region", { name: "Selected file" });
-  await expect(card.getByRole("status")).toHaveText("Ready");
+  await expect(card.getByRole("status")).toHaveText("Ready", SERVER);
   await expect(card).toContainText("jane-doe-resume.pdf");
+  // The parsed summary comes back from the server.
+  await expect(card).toContainText("1 page");
+  await expect(card.getByRole("list", { name: "Sections found" })).toContainText(
+    "Experience",
+  );
 });
 
 test("uploads a real DOCX and shows it as ready", async ({ page }) => {
@@ -32,7 +39,7 @@ test("uploads a real DOCX and shows it as ready", async ({ page }) => {
   });
   await expect(
     page.getByRole("region", { name: "Selected file" }).getByRole("status"),
-  ).toHaveText("Ready");
+  ).toHaveText("Ready", SERVER);
 });
 
 test("the server rejects a text file disguised as a PDF", async ({ page }) => {
@@ -43,7 +50,7 @@ test("the server rejects a text file disguised as a PDF", async ({ page }) => {
     buffer: Buffer.from("This is plain text pretending to be a PDF."),
   });
   const card = page.getByRole("region", { name: "Selected file" });
-  await expect(card.getByRole("status")).toHaveText("Upload failed");
+  await expect(card.getByRole("status")).toHaveText("Upload failed", SERVER);
   await expect(card).toContainText(
     "That file type isn't supported. Upload a PDF or DOCX.",
   );
@@ -57,5 +64,6 @@ test("the server rejects a password-protected Word document", async ({ page }) =
   });
   await expect(page.getByRole("region", { name: "Selected file" })).toContainText(
     "It may be corrupted or password-protected.",
+    SERVER,
   );
 });

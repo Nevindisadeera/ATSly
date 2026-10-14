@@ -1,0 +1,190 @@
+# id|Name|Category|kind|aliases (comma-separated)
+# Source table for src/lib/taxonomy/skills.json. Run: node scripts/taxonomy/build-skills.mjs
+javascript|JavaScript|Programming languages|technology|js,ecmascript,es6,es2015,vanilla js
+typescript|TypeScript|Programming languages|technology|ts
+python|Python|Programming languages|technology|python3,py
+java|Java|Programming languages|technology|java se,java ee,j2ee
+csharp|C#|Programming languages|technology|c sharp,c-sharp
+cpp|C++|Programming languages|technology|cplusplus,c plus plus
+c|C|Programming languages|technology|
+go|Go|Programming languages|technology|golang
+rust|Rust|Programming languages|technology|
+ruby|Ruby|Programming languages|technology|
+php|PHP|Programming languages|technology|
+swift|Swift|Programming languages|technology|
+kotlin|Kotlin|Programming languages|technology|
+scala|Scala|Programming languages|technology|
+r|R|Programming languages|technology|r language,rstudio
+matlab|MATLAB|Programming languages|technology|
+sql|SQL|Data|technology|structured query language,t-sql,tsql,pl/sql,plsql
+bash|Bash|Programming languages|technology|shell scripting,bash scripting,zsh
+powershell|PowerShell|Programming languages|technology|
+dart|Dart|Programming languages|technology|
+html|HTML|Web|technology|html5
+css|CSS|Web|technology|css3
+sass|Sass|Web|technology|scss
+tailwind|Tailwind CSS|Web|technology|tailwind,tailwindcss
+react|React|Frameworks|technology|react.js,reactjs,react js
+nextjs|Next.js|Frameworks|technology|nextjs,next js
+vue|Vue.js|Frameworks|technology|vue,vuejs,vue js
+nuxt|Nuxt|Frameworks|technology|nuxt.js,nuxtjs
+angular|Angular|Frameworks|technology|angularjs,angular.js
+svelte|Svelte|Frameworks|technology|sveltekit
+redux|Redux|Frameworks|technology|redux toolkit
+nodejs|Node.js|Frameworks|technology|node,nodejs,node js
+express|Express|Frameworks|technology|express.js,expressjs
+nestjs|NestJS|Frameworks|technology|nest.js
+django|Django|Frameworks|technology|
+flask|Flask|Frameworks|technology|
+fastapi|FastAPI|Frameworks|technology|
+spring|Spring|Frameworks|technology|spring boot,springboot,spring framework
+dotnet|.NET|Frameworks|technology|dotnet,.net core,asp.net,asp.net core
+rails|Ruby on Rails|Frameworks|technology|rails,ror
+laravel|Laravel|Frameworks|technology|
+react-native|React Native|Frameworks|technology|
+flutter|Flutter|Frameworks|technology|
+graphql|GraphQL|APIs|technology|
+rest|REST APIs|APIs|skill|rest,restful,rest api,restful apis,restful api,rest apis
+grpc|gRPC|APIs|technology|
+websockets|WebSockets|APIs|technology|websocket,socket.io
+postgresql|PostgreSQL|Databases|technology|postgres,psql
+mysql|MySQL|Databases|technology|
+mongodb|MongoDB|Databases|technology|mongo,mongoose
+redis|Redis|Databases|technology|
+sqlite|SQLite|Databases|technology|
+oracle|Oracle Database|Databases|technology|oracle,oracle db
+sql-server|SQL Server|Databases|technology|mssql,microsoft sql server,ms sql
+dynamodb|DynamoDB|Databases|technology|
+elasticsearch|Elasticsearch|Databases|technology|elk stack
+cassandra|Cassandra|Databases|technology|
+firebase|Firebase|Databases|technology|firestore
+supabase|Supabase|Databases|technology|
+aws|AWS|Cloud|technology|amazon web services
+azure|Azure|Cloud|technology|microsoft azure
+gcp|Google Cloud|Cloud|technology|gcp,google cloud platform
+vercel|Vercel|Cloud|tool|
+docker|Docker|DevOps|tool|containerization
+kubernetes|Kubernetes|DevOps|tool|k8s
+terraform|Terraform|DevOps|tool|
+ansible|Ansible|DevOps|tool|
+jenkins|Jenkins|DevOps|tool|
+github-actions|GitHub Actions|DevOps|tool|
+gitlab-ci|GitLab CI|DevOps|tool|gitlab ci/cd
+ci-cd|CI/CD|DevOps|skill|ci/cd,cicd,continuous integration,continuous delivery,continuous deployment
+git|Git|Tools|tool|version control
+github|GitHub|Tools|tool|
+gitlab|GitLab|Tools|tool|
+linux|Linux|Platforms|technology|unix,ubuntu
+nginx|Nginx|DevOps|tool|
+kafka|Kafka|Data|technology|apache kafka
+rabbitmq|RabbitMQ|Data|technology|
+spark|Apache Spark|Data|technology|spark,pyspark
+hadoop|Hadoop|Data|technology|
+airflow|Airflow|Data|tool|apache airflow
+dbt|dbt|Data|tool|
+snowflake|Snowflake|Data|technology|
+bigquery|BigQuery|Data|technology|
+tableau|Tableau|Analytics|tool|
+power-bi|Power BI|Analytics|tool|powerbi
+looker|Looker|Analytics|tool|
+excel|Microsoft Excel|Analytics|tool|excel,ms excel,advanced excel,vlookup,pivot tables
+google-analytics|Google Analytics|Marketing|tool|ga4,google analytics 4
+pandas|pandas|Data|technology|
+numpy|NumPy|Data|technology|
+scikit-learn|scikit-learn|Machine learning|technology|sklearn,scikit learn
+tensorflow|TensorFlow|Machine learning|technology|
+pytorch|PyTorch|Machine learning|technology|torch
+machine-learning|Machine Learning|Machine learning|skill|ml
+deep-learning|Deep Learning|Machine learning|skill|
+nlp|Natural Language Processing|Machine learning|skill|nlp
+computer-vision|Computer Vision|Machine learning|skill|
+llm|Large Language Models|Machine learning|skill|llms,generative ai,genai
+data-analysis|Data Analysis|Analytics|skill|data analytics,analytics
+data-visualization|Data Visualization|Analytics|skill|data viz
+statistics|Statistics|Analytics|skill|statistical analysis
+ab-testing|A/B Testing|Analytics|skill|a/b testing,ab testing,experimentation,split testing
+etl|ETL|Data|skill|data pipelines,elt
+data-modeling|Data Modeling|Data|skill|data modelling
+jest|Jest|Testing|tool|
+vitest|Vitest|Testing|tool|
+cypress|Cypress|Testing|tool|
+playwright|Playwright|Testing|tool|
+selenium|Selenium|Testing|tool|
+pytest|pytest|Testing|tool|
+junit|JUnit|Testing|tool|
+unit-testing|Automated Testing|Testing|skill|unit testing,automated testing,test automation,tdd,test-driven development
+figma|Figma|Design|tool|
+sketch|Sketch|Design|tool|
+adobe-xd|Adobe XD|Design|tool|
+photoshop|Adobe Photoshop|Design|tool|photoshop
+illustrator|Adobe Illustrator|Design|tool|illustrator
+indesign|Adobe InDesign|Design|tool|indesign
+ui-design|UI Design|Design|skill|user interface design,visual design
+ux-design|UX Design|Design|skill|user experience,ux,user experience design,interaction design
+user-research|User Research|Design|skill|usability testing
+wireframing|Wireframing|Design|skill|prototyping,wireframes
+accessibility|Accessibility|Web|skill|a11y,wcag,web accessibility
+responsive-design|Responsive Design|Web|skill|mobile-first design
+seo|SEO|Marketing|skill|search engine optimization
+sem|SEM|Marketing|skill|search engine marketing,ppc,google ads,paid search
+content-marketing|Content Marketing|Marketing|skill|content strategy
+social-media|Social Media Marketing|Marketing|skill|social media,smm
+email-marketing|Email Marketing|Marketing|skill|mailchimp,marketing automation
+hubspot|HubSpot|Marketing|tool|
+salesforce|Salesforce|Sales|tool|sfdc,salesforce crm
+crm|CRM|Sales|skill|customer relationship management
+copywriting|Copywriting|Marketing|skill|
+brand-strategy|Brand Strategy|Marketing|skill|branding,brand management
+market-research|Market Research|Marketing|skill|competitive analysis
+product-management|Product Management|Product|skill|product strategy,product ownership
+roadmapping|Roadmapping|Product|skill|product roadmap,roadmaps
+agile|Agile|Process|skill|agile methodologies,agile development
+scrum|Scrum|Process|skill|scrum master,sprint planning
+kanban|Kanban|Process|skill|
+jira|Jira|Tools|tool|atlassian jira
+confluence|Confluence|Tools|tool|
+notion|Notion|Tools|tool|
+slack|Slack|Tools|tool|
+project-management|Project Management|Management|skill|program management,pmp
+stakeholder-management|Stakeholder Management|Management|skill|stakeholder engagement
+budgeting|Budgeting|Finance|skill|budget management,forecasting
+financial-modeling|Financial Modeling|Finance|skill|financial modelling,financial analysis
+accounting|Accounting|Finance|skill|bookkeeping,gaap,ifrs
+quickbooks|QuickBooks|Finance|tool|
+sap|SAP|Business systems|tool|sap erp
+erp|ERP|Business systems|skill|enterprise resource planning
+microservices|Microservices|Architecture|skill|microservice architecture
+system-design|System Design|Architecture|skill|software architecture,distributed systems
+cloud-architecture|Cloud Architecture|Architecture|skill|cloud computing
+serverless|Serverless|Architecture|skill|aws lambda,lambda,cloud functions
+security|Cybersecurity|Security|skill|information security,infosec
+oauth|OAuth|Security|technology|oauth2,oauth 2.0,openid connect,oidc
+networking|Networking|Infrastructure|skill|tcp/ip,dns
+ios|iOS Development|Mobile|skill|ios
+android|Android Development|Mobile|skill|android
+webpack|Webpack|Web|tool|
+vite|Vite|Web|tool|
+storybook|Storybook|Web|tool|
+api-design|API Design|APIs|skill|api development
+oop|Object-Oriented Programming|Engineering|skill|object oriented programming,oop
+data-structures|Data Structures and Algorithms|Engineering|skill|data structures,algorithms,dsa
+performance-optimization|Performance Optimization|Engineering|skill|web performance,performance tuning
+debugging|Debugging|Engineering|skill|troubleshooting
+code-review|Code Review|Engineering|skill|code reviews
+technical-writing|Technical Writing|Communication|skill|documentation
+customer-service|Customer Service|Business|skill|customer support,client service
+sales|Sales|Business|skill|b2b sales,business development,lead generation
+negotiation|Negotiation|Business|soft|
+recruiting|Recruiting|People|skill|talent acquisition,sourcing
+communication|Communication|Soft skills|soft|communication skills,written communication,verbal communication
+leadership|Leadership|Soft skills|soft|team leadership,people management,team management
+teamwork|Teamwork|Soft skills|soft|collaboration,team player,cross-functional collaboration
+problem-solving|Problem Solving|Soft skills|soft|problem-solving,analytical thinking,critical thinking
+time-management|Time Management|Soft skills|soft|organization,prioritization
+adaptability|Adaptability|Soft skills|soft|flexibility
+attention-to-detail|Attention to Detail|Soft skills|soft|detail-oriented,detail oriented
+creativity|Creativity|Soft skills|soft|creative thinking
+mentoring|Mentoring|Soft skills|soft|coaching
+public-speaking|Public Speaking|Soft skills|soft|presentation skills,presenting
+fortran|Fortran|Programming languages|technology|
+design-systems|Design Systems|Design|skill|design system,component library

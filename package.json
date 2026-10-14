@@ -13,7 +13,9 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "fixtures:pdf": "node scripts/fixtures/build-resume-pdfs.mjs",
+    "taxonomy:build": "node scripts/taxonomy/build-skills.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -27,6 +29,7 @@
     "server-only": "^0.0.1",
     "shadcn": "^4.21.1",
     "tw-animate-css": "^1.4.0",
+    "unpdf": "^1.8.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
