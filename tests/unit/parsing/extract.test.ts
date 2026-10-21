@@ -5,11 +5,16 @@ import { describe, expect, it } from "vitest";
 
 import { analyzeDocument, ParseError } from "@/lib/parsing";
 import { extractDocx } from "@/lib/parsing/extract/docx";
-import { countTables, detectColumnSplit } from "@/lib/parsing/extract/pdf";
+import {
+  countTables,
+  detectColumnSplit,
+  replacementRatio,
+} from "@/lib/parsing/extract/pdf";
 import { readZipDirectory, readZipText, ZipReadError } from "@/lib/parsing/extract/zip";
 
 import { zip } from "../../support/documents";
 import { buildDocx } from "../../support/docx-builder";
+import { line } from "../../support/lines";
 
 const AS_OF = new Date(Date.UTC(2026, 9, 1));
 
@@ -151,6 +156,13 @@ describe("PDF layout heuristics", () => {
     const row = { page: 1, segmentStarts: [0.1, 0.4, 0.7] };
     expect(countTables([row, row, row])).toBe(1);
     expect(countTables([row, row])).toBe(0);
+  });
+
+  it("measures garbled characters, ignoring spaces and a leading symbol-font bullet", () => {
+    expect(replacementRatio([line("Clean text only")])).toBe(0);
+    // 2 bad of 8 non-space characters; the private-use bullet at the start is not counted.
+    expect(replacementRatio([line(" Ab�d efh")])).toBe(0.25);
+    expect(replacementRatio([])).toBe(0);
   });
 });
 

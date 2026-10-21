@@ -82,6 +82,10 @@ export type ParsedSection = {
   kind: SectionKind;
   heading?: string;
   headingIsStandard: boolean;
+  /** The heading stands out visually (style, size, bold or capitals). Parser 1.1.0+. */
+  headingEmphasis?: boolean;
+  /** Words in the section's content, excluding the heading. Parser 1.1.0+. */
+  wordCount?: number;
   /** Indexes into ParsedResume line order (inclusive start, exclusive end). */
   startLine: number;
   endLine: number;
@@ -172,4 +176,4 @@ export class ParseError extends Error {
   }
 }
 
-export const PARSER_VERSION = "1.0.0";
+export const PARSER_VERSION = "1.1.0";
