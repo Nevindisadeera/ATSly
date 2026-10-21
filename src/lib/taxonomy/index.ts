@@ -1,5 +1,6 @@
 import type { EducationLevel, SectionKind, SkillKind } from "@/lib/parsing/types";
 
+import certificationsJson from "./certifications.json";
 import degreesJson from "./degrees.json";
 import headingsJson from "./section-headings.json";
 import skillsJson from "./skills.json";
@@ -158,6 +159,13 @@ const AMBIGUOUS_IN_PROSE = new Set([
   "creativity",
   "negotiation",
   "mentoring",
+  // Product names that are also everyday words ("each workday", "a waterfall").
+  "amplitude",
+  "workday",
+  "asana",
+  "waterfall",
+  "framer",
+  "cro",
 ]);
 
 type ProsePattern = { skill: TaxonomySkill; pattern: RegExp };
@@ -195,6 +203,36 @@ export function findSkillsInText(text: string): TaxonomySkill[] {
 }
 
 export const SKILLS: readonly TaxonomySkill[] = skills;
+
+export type TaxonomyCertification = { id: string; name: string; aliases: string[] };
+
+export const CERTIFICATIONS: readonly TaxonomyCertification[] =
+  certificationsJson as TaxonomyCertification[];
+
+/**
+ * Certification codes of up to five letters ("PMP", "CPA") match only in capitals, so
+ * "cma" or "phr" inside ordinary text don't count; longer names match in any case.
+ */
+const CERTIFICATION_PATTERNS = CERTIFICATIONS.map((certification) => ({
+  certification,
+  patterns: [certification.name, ...certification.aliases].map((term) =>
+    /^[a-z]{2,5}$/i.test(term)
+      ? prosePattern(term.toUpperCase(), "u")
+      : prosePattern(term, "iu"),
+  ),
+}));
+
+/** Certifications mentioned anywhere in free text, deduplicated, in first-seen order. */
+export function findCertificationsInText(text: string): TaxonomyCertification[] {
+  const found: { certification: TaxonomyCertification; index: number }[] = [];
+  for (const { certification, patterns } of CERTIFICATION_PATTERNS) {
+    const indexes = patterns
+      .map((pattern) => pattern.exec(text)?.index)
+      .filter((index): index is number => index !== undefined);
+    if (indexes.length > 0) found.push({ certification, index: Math.min(...indexes) });
+  }
+  return found.sort((a, b) => a.index - b.index).map((f) => f.certification);
+}
 
 /** Words that usually appear in job titles; used to tell titles from company names. */
 export const TITLE_WORDS = new Set([

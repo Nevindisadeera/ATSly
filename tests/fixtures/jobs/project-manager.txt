@@ -1,0 +1,19 @@
+Job title: IT Project Manager
+
+We are seeking an experienced IT Project Manager to lead infrastructure and software delivery projects for a regional healthcare network.
+
+Responsibilities
+- Plan and deliver projects using Agile and Scrum
+- Manage scope, schedules and budgets in Jira and Microsoft Project
+- Lead risk management and stakeholder management across clinical and IT teams
+- Coordinate vendors and report progress to the steering committee
+
+Requirements
+- 7+ years of project management experience, including 3 years in IT
+- PMP certification required
+- Strong stakeholder management and communication
+- Bachelor's degree in Information Technology, Business or a related field
+
+Preferred
+- Certified ScrumMaster (CSM)
+- ITIL Foundation

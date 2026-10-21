@@ -13,7 +13,7 @@ import { BASE_OPTIONS, OwnerSchema } from "./shared";
 /**
  * scans — docs/PLANNING.md §16.4. One analysis of one resume. The finished report is
  * embedded: it is produced once, read as a unit, and never partially updated afterwards.
- * Fields for job matching and AI (match, jobSnapshot, ai details) arrive in Phases 9a and 10a.
+ * AI details (ai.recommendations, usage, contentQuality) arrive in Phase 10a.
  */
 
 export const SCAN_STATUSES: ScanStatus[] = ["queued", "running", "complete", "failed"];
@@ -50,6 +50,8 @@ const SummarySchema = new Schema(
       major: { type: Number, required: true },
       minor: { type: Number, required: true },
     },
+    matchScore: { type: Number, min: 0, max: 100 },
+    matchBand: { type: String, enum: ["strong", "moderate", "partial", "low"] },
   },
   { _id: false },
 );
@@ -76,7 +78,16 @@ const ScanSchema = new Schema(
       ),
       default: undefined,
     },
+    /** MatchReport from the matching engine, when a job description was given (Phase 9a). */
+    match: { type: Schema.Types.Mixed },
     summary: { type: SummarySchema, default: undefined },
+    jobSnapshot: {
+      type: new Schema(
+        { title: { type: String }, company: { type: String } },
+        { _id: false },
+      ),
+      default: undefined,
+    },
     resumeSnapshot: {
       fileName: { type: String, required: true },
       pageCount: { type: Number, required: true },
@@ -108,7 +119,9 @@ export type ScanDocument = {
   model?: string | null;
   ats?: unknown;
   ai?: { status: ScanAiStatus } | null;
+  match?: unknown;
   summary?: ScanSummary | null;
+  jobSnapshot?: { title?: string | null; company?: string | null } | null;
   resumeSnapshot: { fileName: string; pageCount: number; wordCount: number };
   durationMs?: number | null;
   createdAt: Date;

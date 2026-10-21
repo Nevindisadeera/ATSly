@@ -9,6 +9,7 @@ import { logger } from "@/lib/logging/logger";
 import type { CreateScanInput } from "@/lib/validation/scan";
 import type { CreateScanResult, ScanDetail, ScanStatusResult } from "@/types/api";
 
+import { acceptJobDescription } from "./job-service";
 import { guestExpiry } from "./retention";
 import { SCAN_FAILURES } from "./scan-pipeline";
 
@@ -18,8 +19,8 @@ export const STALE_AFTER_MS = 90_000;
 type Context = { requestId: string; owner: Owner };
 
 /**
- * Creates a queued scan of one of the owner's resumes. The caller starts the pipeline
- * (after the response is sent) with the returned id.
+ * Creates a queued scan of one of the owner's resumes, optionally against a job
+ * description. The caller starts the pipeline (after the response is sent) with the id.
  */
 export async function createScan(
   input: CreateScanInput,
@@ -33,10 +34,16 @@ export async function createScan(
   // A guest's resume stays as long as its newest scan.
   if (expiresAt) await resumeRepository.extendExpiry(owner, resume.id, expiresAt);
 
+  const job = input.jobDescription
+    ? await acceptJobDescription(input.jobDescription, context)
+    : null;
+
   const scan = await scanRepository.create({
     owner,
     expiresAt,
     resumeId: resume.id,
+    jobDescriptionId: job?.id ?? null,
+    jobSnapshot: job ? { title: job.title, company: job.company } : null,
     engineVersion: ENGINE_VERSION,
     resumeSnapshot: {
       fileName: resume.file.originalName,
@@ -49,6 +56,7 @@ export async function createScan(
     requestId: context.requestId,
     scanId: scan.id,
     resumeId: resume.id,
+    jobDescriptionId: job?.id,
     ownerType: owner.type,
   });
   return { scanId: scan.id };
@@ -72,6 +80,14 @@ export async function getScanForOwner(owner: Owner, id: string): Promise<ScanDet
     resume: { id: scan.resumeId, ...scan.resumeSnapshot },
     summary: scan.summary,
     ats: scan.ats,
+    job: scan.jobDescriptionId
+      ? {
+          id: scan.jobDescriptionId,
+          title: scan.jobSnapshot?.title ?? null,
+          company: scan.jobSnapshot?.company ?? null,
+        }
+      : null,
+    match: scan.match,
     ai: scan.ai,
     durationMs: scan.durationMs,
   };

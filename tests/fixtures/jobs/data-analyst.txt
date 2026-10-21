@@ -1,0 +1,22 @@
+Data Analyst
+Location: Chicago, IL (hybrid)
+
+We're looking for a Data Analyst to turn product and sales data into decisions. You'll partner with product managers and executives and own key dashboards.
+
+Responsibilities:
+- Build and maintain dashboards in Tableau or Power BI
+- Write SQL to answer product and revenue questions
+- Design and analyze A/B tests with the product team
+- Present findings to non-technical stakeholders
+
+Requirements:
+- 2-4 years of experience in a data analysis role
+- Advanced SQL and Microsoft Excel
+- Experience with Python (pandas) for analysis
+- Solid grounding in statistics
+- Bachelor's degree in Statistics, Economics or a related field
+
+Preferred:
+- dbt
+- Looker
+- Experience with Snowflake or BigQuery

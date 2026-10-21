@@ -176,4 +176,4 @@ export class ParseError extends Error {
   }
 }
 
-export const PARSER_VERSION = "1.1.0";
+export const PARSER_VERSION = "1.2.0";

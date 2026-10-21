@@ -2,6 +2,7 @@ import "server-only";
 
 import type { AtsReport } from "@/lib/ats";
 import type { Owner } from "@/lib/auth/owner";
+import type { MatchReport } from "@/lib/matching";
 import type {
   ScanAiStatus,
   ScanError,
@@ -21,11 +22,14 @@ export type StoredScan = {
   createdAt: Date;
   updatedAt: Date;
   resumeId: string;
+  jobDescriptionId: string | null;
+  jobSnapshot: { title: string | null; company: string | null } | null;
   status: ScanStatus;
   stage: ScanStage | null;
   error: ScanError | null;
   engineVersion: string;
   ats: AtsReport | null;
+  match: MatchReport | null;
   ai: { status: ScanAiStatus } | null;
   summary: ScanSummary | null;
   resumeSnapshot: { fileName: string; pageCount: number; wordCount: number };
@@ -35,10 +39,12 @@ export type StoredScan = {
 export type NewScan = Pick<
   StoredScan,
   "owner" | "expiresAt" | "resumeId" | "engineVersion" | "resumeSnapshot"
->;
+> &
+  Partial<Pick<StoredScan, "jobDescriptionId" | "jobSnapshot">>;
 
 export type ScanResult = {
   ats: AtsReport;
+  match?: MatchReport;
   summary: ScanSummary;
   ai: { status: ScanAiStatus };
   durationMs: number;
@@ -55,6 +61,10 @@ function toStored(doc: ScanDocument): StoredScan {
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
     resumeId: String(doc.resumeId),
+    jobDescriptionId: doc.jobDescriptionId ? String(doc.jobDescriptionId) : null,
+    jobSnapshot: doc.jobSnapshot
+      ? { title: doc.jobSnapshot.title ?? null, company: doc.jobSnapshot.company ?? null }
+      : null,
     status: doc.status,
     stage: doc.stage ?? null,
     error: doc.error
@@ -66,6 +76,7 @@ function toStored(doc: ScanDocument): StoredScan {
       : null,
     engineVersion: doc.engineVersion,
     ats: (doc.ats as AtsReport | undefined) ?? null,
+    match: (doc.match as MatchReport | undefined) ?? null,
     ai: doc.ai ? { status: doc.ai.status } : null,
     summary: doc.summary ?? null,
     resumeSnapshot: { ...doc.resumeSnapshot },
@@ -89,6 +100,13 @@ export const scanRepository = {
       const doc = await ScanModel.create({
         ...data,
         expiresAt: data.expiresAt ?? undefined,
+        jobDescriptionId: data.jobDescriptionId ?? undefined,
+        jobSnapshot: data.jobSnapshot
+          ? {
+              title: data.jobSnapshot.title ?? undefined,
+              company: data.jobSnapshot.company ?? undefined,
+            }
+          : undefined,
         status: "queued",
         stage: null,
       });

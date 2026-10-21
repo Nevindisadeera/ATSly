@@ -3,7 +3,7 @@ import type { AtsBand } from "@/types/report";
 import type { CategoryKey, Confidence } from "./types";
 
 /** Engine version — bump whenever checks, deductions or weights change. */
-export const ENGINE_VERSION = "1.0.0";
+export const ENGINE_VERSION = "1.1.0";
 
 /** Final category weights — docs/PLANNING.md §18.1. They sum to 100. */
 export const CATEGORY_WEIGHTS: Record<CategoryKey, number> = {

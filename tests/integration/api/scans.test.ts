@@ -10,11 +10,13 @@ import { GET as getScanRoute } from "@/app/api/scans/[id]/route";
 import { GET as getStatusRoute } from "@/app/api/scans/[id]/status/route";
 import { POST as postScanRoute } from "@/app/api/scans/route";
 import { encodeGuestCookie, GUEST_COOKIE } from "@/lib/auth/guest";
+import { JobDescriptionModel } from "@/lib/db/models/job-description";
 import { ResumeModel } from "@/lib/db/models/resume";
 import { ScanModel } from "@/lib/db/models/scan";
 import { runScanPipeline } from "@/lib/services/scan-pipeline";
 import type { ScanDetail, ScanStatusResult } from "@/types/api";
 
+import { JOB_FIXTURES } from "../../fixtures/jobs/jobs";
 import { setupTestDatabase } from "../../support/database";
 
 /**
@@ -102,8 +104,17 @@ async function getStatus(id: string, cookie?: string) {
 }
 
 /** Starts a scan and returns its id. */
-async function startScan(resumeId: string, cookie: string, ip?: string) {
-  const response = await postScan({ resumeId }, cookie, ip);
+async function startScan(
+  resumeId: string,
+  cookie: string,
+  ip?: string,
+  jobDescription?: Record<string, unknown>,
+) {
+  const response = await postScan(
+    jobDescription ? { resumeId, jobDescription } : { resumeId },
+    cookie,
+    ip,
+  );
   expect(response.status).toBe(202);
   const { data } = await response.json();
   return data.scanId as string;
@@ -204,6 +215,116 @@ describe("POST /api/scans → status → report", () => {
     });
     const scan = await getScan(scanId, cookie);
     expect(scan.body.data).toMatchObject({ ats: null, summary: null });
+  });
+});
+
+describe("scans with a job description", () => {
+  const backendJob = () =>
+    JOB_FIXTURES.find((j) => j.name === "backend-engineer")!.load();
+
+  it("matches the resume against the job and stores the report with the scan", async () => {
+    const { resumeId, cookie } = await newGuestWithResume();
+    const scanId = await startScan(resumeId, cookie, undefined, {
+      text: backendJob(),
+      company: "Northwind Payments",
+    });
+    await runBackground();
+
+    const { body } = await getScan(scanId, cookie);
+    const scan = body.data as ScanDetail;
+    expect(scan.status).toBe("complete");
+    expect(scan.job).toEqual({
+      id: expect.stringMatching(/^[0-9a-f]{24}$/),
+      title: "Senior Backend Engineer",
+      company: "Northwind Payments",
+    });
+    expect(scan.match?.components).toHaveLength(6);
+    expect(
+      scan.match?.components.find((c) => c.key === "responsibilities")?.score,
+    ).toBeNull();
+    expect(scan.summary).toMatchObject({
+      matchScore: scan.match!.score,
+      matchBand: scan.match!.band,
+    });
+    expect(
+      scan.summary!.headline.endsWith(
+        `Keyword coverage for this role is ${scan.match!.band}.`,
+      ),
+    ).toBe(true);
+    // The ATS score doesn't depend on the job.
+    expect(scan.summary!.atsScore).toBe(scan.ats!.score);
+  });
+
+  it("leaves job and match empty for a scan without a job description", async () => {
+    const { resumeId, cookie } = await newGuestWithResume();
+    const scanId = await startScan(resumeId, cookie);
+    await runBackground();
+    const scan = (await getScan(scanId, cookie)).body.data as ScanDetail;
+    expect(scan).toMatchObject({ job: null, match: null });
+    expect(scan.summary).not.toHaveProperty("matchScore");
+  });
+
+  it("reuses a posting pasted again by the same guest, but not across guests", async () => {
+    const a = await newGuestWithResume();
+    const b = await newGuestWithResume();
+    const text = backendJob();
+    await startScan(a.resumeId, a.cookie, undefined, { text });
+    // Surrounding whitespace doesn't make it a different posting.
+    await startScan(a.resumeId, a.cookie, undefined, { text: `  ${text}\n` });
+    await startScan(b.resumeId, b.cookie, undefined, { text });
+    expect(await JobDescriptionModel.countDocuments()).toBe(2);
+
+    const scansOfA = await ScanModel.find({ resumeId: a.resumeId }).lean();
+    expect(new Set(scansOfA.map((s) => String(s.jobDescriptionId))).size).toBe(1);
+  });
+
+  it("stores the job description for the guest with the same expiry as the scan", async () => {
+    const { resumeId, cookie } = await newGuestWithResume();
+    const scanId = await startScan(resumeId, cookie, undefined, { text: backendJob() });
+    const scan = await ScanModel.findById(scanId).lean();
+    const job = await JobDescriptionModel.findById(scan!.jobDescriptionId).lean();
+    expect(job!.owner).toEqual(scan!.owner);
+    expect(job!.extractionSource).toBe("rules");
+    expect(Math.abs(job!.expiresAt!.getTime() - scan!.expiresAt!.getTime())).toBeLessThan(
+      5_000,
+    );
+  });
+
+  it("fails the scan if its job description disappears before matching", async () => {
+    const { resumeId, cookie } = await newGuestWithResume();
+    const scanId = await startScan(resumeId, cookie, undefined, { text: backendJob() });
+    await JobDescriptionModel.deleteMany({});
+    await runBackground();
+    expect((await getStatus(scanId, cookie)).body.data).toMatchObject({
+      status: "failed",
+      error: { code: "INTERNAL" },
+    });
+  });
+
+  it.each([
+    [
+      "a description under 100 characters",
+      { text: "Python developer wanted." },
+      "at least 100 characters",
+    ],
+    [
+      "a description over 15,000 characters",
+      { text: "x".repeat(15_001) },
+      "up to 15,000 characters",
+    ],
+    [
+      "a title over 120 characters",
+      { text: "y".repeat(200), title: "t".repeat(121) },
+      "under 120 characters",
+    ],
+    ["an unknown field", { text: "y".repeat(200), salary: 1 }, "salary"],
+    ["a missing text", { title: "Engineer" }, "jobDescription.text is required."],
+  ])("rejects %s", async (_, jobDescription, message) => {
+    const { resumeId, cookie } = await newGuestWithResume();
+    const response = await postScan({ resumeId, jobDescription }, cookie);
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.message).toContain(message);
+    expect(await JobDescriptionModel.countDocuments()).toBe(0);
   });
 });
 

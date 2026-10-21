@@ -1677,5 +1677,767 @@
    "design system",
    "component library"
   ]
+ },
+ {
+  "id": "jquery",
+  "name": "jQuery",
+  "category": "Web",
+  "kind": "technology",
+  "aliases": []
+ },
+ {
+  "id": "prisma",
+  "name": "Prisma",
+  "category": "Data",
+  "kind": "tool",
+  "aliases": [
+   "prisma orm"
+  ]
+ },
+ {
+  "id": "pulumi",
+  "name": "Pulumi",
+  "category": "DevOps",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "prometheus",
+  "name": "Prometheus",
+  "category": "DevOps",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "grafana",
+  "name": "Grafana",
+  "category": "DevOps",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "datadog",
+  "name": "Datadog",
+  "category": "DevOps",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "cloudformation",
+  "name": "AWS CloudFormation",
+  "category": "DevOps",
+  "kind": "tool",
+  "aliases": [
+   "cloudformation"
+  ]
+ },
+ {
+  "id": "amazon-s3",
+  "name": "Amazon S3",
+  "category": "Cloud",
+  "kind": "technology",
+  "aliases": [
+   "aws s3",
+   "s3"
+  ]
+ },
+ {
+  "id": "openapi",
+  "name": "OpenAPI",
+  "category": "APIs",
+  "kind": "technology",
+  "aliases": [
+   "swagger",
+   "openapi specification"
+  ]
+ },
+ {
+  "id": "observability",
+  "name": "Observability",
+  "category": "DevOps",
+  "kind": "skill",
+  "aliases": [
+   "monitoring and observability",
+   "application monitoring"
+  ]
+ },
+ {
+  "id": "event-driven",
+  "name": "Event-Driven Architecture",
+  "category": "Architecture",
+  "kind": "skill",
+  "aliases": [
+   "event driven architecture",
+   "event-driven systems"
+  ]
+ },
+ {
+  "id": "vba",
+  "name": "VBA",
+  "category": "Programming languages",
+  "kind": "technology",
+  "aliases": [
+   "excel vba"
+  ]
+ },
+ {
+  "id": "sas",
+  "name": "SAS",
+  "category": "Analytics",
+  "kind": "tool",
+  "aliases": [
+   "sas programming"
+  ]
+ },
+ {
+  "id": "spss",
+  "name": "SPSS",
+  "category": "Analytics",
+  "kind": "tool",
+  "aliases": [
+   "ibm spss"
+  ]
+ },
+ {
+  "id": "stata",
+  "name": "Stata",
+  "category": "Analytics",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "data-warehousing",
+  "name": "Data Warehousing",
+  "category": "Data",
+  "kind": "skill",
+  "aliases": [
+   "data warehouse",
+   "data warehouses"
+  ]
+ },
+ {
+  "id": "predictive-modeling",
+  "name": "Predictive Modeling",
+  "category": "Machine learning",
+  "kind": "skill",
+  "aliases": [
+   "predictive modelling",
+   "predictive models"
+  ]
+ },
+ {
+  "id": "regression-analysis",
+  "name": "Regression Analysis",
+  "category": "Analytics",
+  "kind": "skill",
+  "aliases": [
+   "regression models",
+   "linear regression"
+  ]
+ },
+ {
+  "id": "dashboards",
+  "name": "Dashboarding",
+  "category": "Analytics",
+  "kind": "skill",
+  "aliases": [
+   "dashboards",
+   "dashboard development",
+   "kpi dashboards"
+  ]
+ },
+ {
+  "id": "looker-studio",
+  "name": "Looker Studio",
+  "category": "Analytics",
+  "kind": "tool",
+  "aliases": [
+   "google data studio",
+   "data studio"
+  ]
+ },
+ {
+  "id": "mixpanel",
+  "name": "Mixpanel",
+  "category": "Analytics",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "amplitude",
+  "name": "Amplitude",
+  "category": "Analytics",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "information-architecture",
+  "name": "Information Architecture",
+  "category": "Design",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "design-thinking",
+  "name": "Design Thinking",
+  "category": "Design",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "journey-mapping",
+  "name": "Journey Mapping",
+  "category": "Design",
+  "kind": "skill",
+  "aliases": [
+   "customer journey mapping",
+   "user journey mapping",
+   "journey maps"
+  ]
+ },
+ {
+  "id": "after-effects",
+  "name": "Adobe After Effects",
+  "category": "Design",
+  "kind": "tool",
+  "aliases": [
+   "after effects"
+  ]
+ },
+ {
+  "id": "premiere-pro",
+  "name": "Adobe Premiere Pro",
+  "category": "Design",
+  "kind": "tool",
+  "aliases": [
+   "premiere pro"
+  ]
+ },
+ {
+  "id": "canva",
+  "name": "Canva",
+  "category": "Design",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "framer",
+  "name": "Framer",
+  "category": "Design",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "invision",
+  "name": "InVision",
+  "category": "Design",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "miro",
+  "name": "Miro",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "typography",
+  "name": "Typography",
+  "category": "Design",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "meta-ads",
+  "name": "Meta Ads",
+  "category": "Marketing",
+  "kind": "tool",
+  "aliases": [
+   "facebook ads",
+   "instagram ads",
+   "meta ads manager"
+  ]
+ },
+ {
+  "id": "marketo",
+  "name": "Marketo",
+  "category": "Marketing",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "semrush",
+  "name": "Semrush",
+  "category": "Marketing",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "ahrefs",
+  "name": "Ahrefs",
+  "category": "Marketing",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "google-tag-manager",
+  "name": "Google Tag Manager",
+  "category": "Marketing",
+  "kind": "tool",
+  "aliases": [
+   "tag manager"
+  ]
+ },
+ {
+  "id": "cro",
+  "name": "Conversion Rate Optimization",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": [
+   "cro",
+   "conversion optimization"
+  ]
+ },
+ {
+  "id": "demand-generation",
+  "name": "Demand Generation",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": [
+   "demand gen"
+  ]
+ },
+ {
+  "id": "growth-marketing",
+  "name": "Growth Marketing",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "product-marketing",
+  "name": "Product Marketing",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "digital-marketing",
+  "name": "Digital Marketing",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "marketing-analytics",
+  "name": "Marketing Analytics",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "campaign-management",
+  "name": "Campaign Management",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": [
+   "campaign planning"
+  ]
+ },
+ {
+  "id": "go-to-market",
+  "name": "Go-to-Market Strategy",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": [
+   "go-to-market",
+   "go to market strategy",
+   "gtm strategy"
+  ]
+ },
+ {
+  "id": "public-relations",
+  "name": "Public Relations",
+  "category": "Marketing",
+  "kind": "skill",
+  "aliases": [
+   "media relations"
+  ]
+ },
+ {
+  "id": "wordpress",
+  "name": "WordPress",
+  "category": "Web",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "account-management",
+  "name": "Account Management",
+  "category": "Sales",
+  "kind": "skill",
+  "aliases": [
+   "key account management"
+  ]
+ },
+ {
+  "id": "pipeline-management",
+  "name": "Pipeline Management",
+  "category": "Sales",
+  "kind": "skill",
+  "aliases": [
+   "sales pipeline",
+   "pipeline management"
+  ]
+ },
+ {
+  "id": "cold-calling",
+  "name": "Cold Calling",
+  "category": "Sales",
+  "kind": "skill",
+  "aliases": [
+   "cold outreach"
+  ]
+ },
+ {
+  "id": "pipedrive",
+  "name": "Pipedrive",
+  "category": "Sales",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "customer-success",
+  "name": "Customer Success",
+  "category": "Business",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "financial-reporting",
+  "name": "Financial Reporting",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "management reporting"
+  ]
+ },
+ {
+  "id": "fpa",
+  "name": "FP&A",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "financial planning and analysis",
+   "fp&a"
+  ]
+ },
+ {
+  "id": "valuation",
+  "name": "Valuation",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "dcf",
+   "discounted cash flow",
+   "company valuation"
+  ]
+ },
+ {
+  "id": "variance-analysis",
+  "name": "Variance Analysis",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "budget variance analysis"
+  ]
+ },
+ {
+  "id": "auditing",
+  "name": "Auditing",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "internal audit",
+   "external audit",
+   "audit procedures"
+  ]
+ },
+ {
+  "id": "reconciliation",
+  "name": "Account Reconciliation",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "account reconciliations",
+   "bank reconciliation",
+   "reconciliations"
+  ]
+ },
+ {
+  "id": "accounts-payable",
+  "name": "Accounts Payable",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "accounts-receivable",
+  "name": "Accounts Receivable",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "tax",
+  "name": "Tax Preparation",
+  "category": "Finance",
+  "kind": "skill",
+  "aliases": [
+   "tax compliance",
+   "tax returns"
+  ]
+ },
+ {
+  "id": "netsuite",
+  "name": "NetSuite",
+  "category": "Business systems",
+  "kind": "tool",
+  "aliases": [
+   "oracle netsuite"
+  ]
+ },
+ {
+  "id": "xero",
+  "name": "Xero",
+  "category": "Finance",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "bloomberg",
+  "name": "Bloomberg Terminal",
+  "category": "Finance",
+  "kind": "tool",
+  "aliases": [
+   "bloomberg terminal"
+  ]
+ },
+ {
+  "id": "workday",
+  "name": "Workday",
+  "category": "Business systems",
+  "kind": "tool",
+  "aliases": [
+   "workday hcm"
+  ]
+ },
+ {
+  "id": "risk-management",
+  "name": "Risk Management",
+  "category": "Management",
+  "kind": "skill",
+  "aliases": [
+   "risk assessment"
+  ]
+ },
+ {
+  "id": "change-management",
+  "name": "Change Management",
+  "category": "Management",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "resource-planning",
+  "name": "Resource Planning",
+  "category": "Management",
+  "kind": "skill",
+  "aliases": [
+   "resource allocation",
+   "capacity planning"
+  ]
+ },
+ {
+  "id": "vendor-management",
+  "name": "Vendor Management",
+  "category": "Management",
+  "kind": "skill",
+  "aliases": [
+   "supplier management"
+  ]
+ },
+ {
+  "id": "process-improvement",
+  "name": "Process Improvement",
+  "category": "Process",
+  "kind": "skill",
+  "aliases": [
+   "continuous improvement",
+   "process optimization"
+  ]
+ },
+ {
+  "id": "six-sigma",
+  "name": "Six Sigma",
+  "category": "Process",
+  "kind": "skill",
+  "aliases": [
+   "lean six sigma"
+  ]
+ },
+ {
+  "id": "waterfall",
+  "name": "Waterfall",
+  "category": "Process",
+  "kind": "skill",
+  "aliases": [
+   "waterfall methodology"
+  ]
+ },
+ {
+  "id": "ms-project",
+  "name": "Microsoft Project",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": [
+   "ms project"
+  ]
+ },
+ {
+  "id": "asana",
+  "name": "Asana",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "trello",
+  "name": "Trello",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "smartsheet",
+  "name": "Smartsheet",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": []
+ },
+ {
+  "id": "okrs",
+  "name": "OKRs",
+  "category": "Product",
+  "kind": "skill",
+  "aliases": [
+   "okr",
+   "objectives and key results"
+  ]
+ },
+ {
+  "id": "user-stories",
+  "name": "User Stories",
+  "category": "Product",
+  "kind": "skill",
+  "aliases": [
+   "user story",
+   "writing user stories"
+  ]
+ },
+ {
+  "id": "requirements-gathering",
+  "name": "Requirements Gathering",
+  "category": "Product",
+  "kind": "skill",
+  "aliases": [
+   "requirements analysis",
+   "business requirements"
+  ]
+ },
+ {
+  "id": "business-analysis",
+  "name": "Business Analysis",
+  "category": "Business",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "powerpoint",
+  "name": "Microsoft PowerPoint",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": [
+   "powerpoint",
+   "ms powerpoint"
+  ]
+ },
+ {
+  "id": "microsoft-office",
+  "name": "Microsoft Office",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": [
+   "ms office",
+   "office 365",
+   "microsoft 365"
+  ]
+ },
+ {
+  "id": "google-workspace",
+  "name": "Google Workspace",
+  "category": "Tools",
+  "kind": "tool",
+  "aliases": [
+   "g suite",
+   "gsuite"
+  ]
+ },
+ {
+  "id": "performance-management",
+  "name": "Performance Management",
+  "category": "People",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "employee-relations",
+  "name": "Employee Relations",
+  "category": "People",
+  "kind": "skill",
+  "aliases": []
+ },
+ {
+  "id": "hris",
+  "name": "HRIS",
+  "category": "People",
+  "kind": "tool",
+  "aliases": [
+   "human resources information system"
+  ]
+ },
+ {
+  "id": "emotional-intelligence",
+  "name": "Emotional Intelligence",
+  "category": "Soft skills",
+  "kind": "soft",
+  "aliases": []
+ },
+ {
+  "id": "conflict-resolution",
+  "name": "Conflict Resolution",
+  "category": "Soft skills",
+  "kind": "soft",
+  "aliases": []
+ },
+ {
+  "id": "decision-making",
+  "name": "Decision Making",
+  "category": "Soft skills",
+  "kind": "soft",
+  "aliases": [
+   "decision-making"
+  ]
  }
 ]

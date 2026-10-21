@@ -1,0 +1,123 @@
+[
+  { "id": "pmp", "name": "PMP", "aliases": ["project management professional"] },
+  {
+    "id": "capm",
+    "name": "CAPM",
+    "aliases": ["certified associate in project management"]
+  },
+  {
+    "id": "csm",
+    "name": "Certified ScrumMaster",
+    "aliases": ["csm", "certified scrum master", "scrum master certification"]
+  },
+  {
+    "id": "psm",
+    "name": "Professional Scrum Master",
+    "aliases": ["psm", "psm i", "psm ii"]
+  },
+  {
+    "id": "prince2",
+    "name": "PRINCE2",
+    "aliases": ["prince2 practitioner", "prince2 foundation"]
+  },
+  { "id": "itil", "name": "ITIL", "aliases": ["itil foundation", "itil v4", "itil 4"] },
+  {
+    "id": "aws-certification",
+    "name": "AWS Certification",
+    "aliases": ["aws certified", "aws certifications", "aws certification"]
+  },
+  {
+    "id": "aws-solutions-architect",
+    "name": "AWS Certified Solutions Architect",
+    "aliases": ["aws solutions architect", "aws certified solutions architect"]
+  },
+  {
+    "id": "azure-certification",
+    "name": "Microsoft Azure Certification",
+    "aliases": [
+      "azure certified",
+      "azure certification",
+      "azure fundamentals",
+      "azure administrator",
+      "az-900",
+      "az-104",
+      "az-204",
+      "az-305"
+    ]
+  },
+  {
+    "id": "gcp-certification",
+    "name": "Google Cloud Certification",
+    "aliases": ["google cloud certified", "gcp certified", "professional cloud architect"]
+  },
+  { "id": "cka", "name": "Certified Kubernetes Administrator", "aliases": ["cka"] },
+  {
+    "id": "cissp",
+    "name": "CISSP",
+    "aliases": ["certified information systems security professional"]
+  },
+  {
+    "id": "comptia-security",
+    "name": "CompTIA Security+",
+    "aliases": ["security+", "comptia security+", "comptia security plus"]
+  },
+  { "id": "ccna", "name": "CCNA", "aliases": ["cisco certified network associate"] },
+  { "id": "cpa", "name": "CPA", "aliases": ["certified public accountant"] },
+  {
+    "id": "cfa",
+    "name": "CFA",
+    "aliases": [
+      "chartered financial analyst",
+      "cfa charterholder",
+      "cfa level i",
+      "cfa level ii"
+    ]
+  },
+  { "id": "acca", "name": "ACCA", "aliases": ["chartered certified accountant"] },
+  { "id": "cma", "name": "CMA", "aliases": ["certified management accountant"] },
+  {
+    "id": "google-analytics-certification",
+    "name": "Google Analytics Certification",
+    "aliases": ["google analytics certified", "google analytics certification", "gaiq"]
+  },
+  {
+    "id": "google-ads-certification",
+    "name": "Google Ads Certification",
+    "aliases": ["google ads certified", "google ads certification"]
+  },
+  {
+    "id": "hubspot-certification",
+    "name": "HubSpot Certification",
+    "aliases": [
+      "hubspot certified",
+      "hubspot certification",
+      "hubspot inbound certification"
+    ]
+  },
+  {
+    "id": "six-sigma-certification",
+    "name": "Six Sigma Certification",
+    "aliases": [
+      "six sigma green belt",
+      "six sigma black belt",
+      "lean six sigma green belt",
+      "lean six sigma black belt",
+      "six sigma certification",
+      "six sigma certified"
+    ]
+  },
+  {
+    "id": "shrm",
+    "name": "SHRM-CP",
+    "aliases": ["shrm-scp", "shrm certified", "shrm certification"]
+  },
+  { "id": "phr", "name": "PHR", "aliases": ["professional in human resources"] },
+  {
+    "id": "google-ux-certificate",
+    "name": "Google UX Design Certificate",
+    "aliases": [
+      "google ux design certificate",
+      "google ux design professional certificate"
+    ]
+  }
+]
