@@ -9,6 +9,7 @@ import {
   resumeRepository,
   type StoredResume,
 } from "@/lib/db/repositories/resume-repository";
+import { scanRepository } from "@/lib/db/repositories/scan-repository";
 import { AppError } from "@/lib/http/errors";
 import { logger } from "@/lib/logging/logger";
 import {
@@ -22,9 +23,10 @@ import { checkFileSignature } from "@/lib/security/file-signature";
 import { checkResumeFile } from "@/lib/validation/upload";
 import type { ResumeDetail, ResumeUploadResult } from "@/types/api";
 
+import { guestExpiry } from "./retention";
+
 /** Parsing budget; the route's maxDuration leaves headroom above this. */
 const PARSE_TIMEOUT_MS = 15_000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type IncomingResumeFile = {
   name: string;
@@ -40,13 +42,6 @@ export function sanitizeFileName(name: string): string {
   const base = name.split(/[\\/]/).pop() ?? "";
   const cleaned = base.replace(/[\u0000-\u001f\u007f]/g, "").trim();
   return (cleaned || "resume").slice(0, 200);
-}
-
-/** Guest data is deleted after GUEST_RETENTION_DAYS; account data is kept. */
-function expiryFor(owner: Owner): Date | null {
-  if (owner.type !== "guest") return null;
-  const days = Number(process.env.GUEST_RETENTION_DAYS) || 7;
-  return new Date(Date.now() + days * DAY_MS);
 }
 
 /**
@@ -86,7 +81,7 @@ export async function acceptResumeUpload(
     PARSER_VERSION,
   );
   if (duplicate) {
-    const expiresAt = expiryFor(context.owner);
+    const expiresAt = guestExpiry(context.owner);
     if (expiresAt)
       await resumeRepository.extendExpiry(context.owner, duplicate.id, expiresAt);
     logger.info("resume.reused", {
@@ -105,7 +100,7 @@ export async function acceptResumeUpload(
 
   const stored = await resumeRepository.create({
     owner: context.owner,
-    expiresAt: expiryFor(context.owner),
+    expiresAt: guestExpiry(context.owner),
     file: {
       originalName: fileName,
       extension: check.extension,
@@ -152,10 +147,13 @@ export async function getResumeForOwner(owner: Owner, id: string): Promise<Resum
   };
 }
 
+/** Deletes a resume and every scan of it — docs/PLANNING.md §22. Scans go first. */
 export async function deleteResumeForOwner(owner: Owner, id: string): Promise<void> {
-  // Phase 7b also deletes the resume's scans here.
+  // Scoped by owner, so this deletes nothing when the resume isn't the caller's.
+  const scans = await scanRepository.deleteForResume(owner, id);
   const deleted = await resumeRepository.deleteForOwner(owner, id);
   if (!deleted) throw new AppError("NOT_FOUND");
+  logger.info("resume.deleted", { resumeId: id, scans });
 }
 
 async function parse(

@@ -66,3 +66,53 @@ export type ResumeDetail = ResumeUploadResult & {
   expiresAt: string | null;
   parsed: import("@/lib/parsing/types").ParsedResume;
 };
+
+/** Scan lifecycle — docs/PLANNING.md §16.4. */
+export type ScanStatus = "queued" | "running" | "complete" | "failed";
+
+/** Pipeline stage of a queued or running scan; drives the progress UI. */
+export type ScanStage = "ats_rules" | "job_matching" | "ai_analysis" | "finalizing";
+
+/** Why a scan failed: an unexpected pipeline error, or no progress for too long. */
+export type ScanErrorCode = "INTERNAL" | "TIMEOUT";
+
+export type ScanError = { code: ScanErrorCode; message: string; retryable: boolean };
+
+/** AI analysis outcome. Until AI analysis exists (Phase 10a) every scan is "skipped". */
+export type ScanAiStatus = "complete" | "partial" | "skipped" | "failed";
+
+/** Denormalized highlights of a complete scan, for lists and the results hero. */
+export type ScanSummary = {
+  headline: string;
+  atsScore: number;
+  atsBand: import("@/types/report").AtsBand;
+  /** Up to three fixes for the largest deductions, most important first. */
+  topActions: string[];
+  /** Failed and warned checks by severity; informational ones count as minor. */
+  issueCounts: { critical: number; major: number; minor: number };
+};
+
+/** Response of POST /api/scans (202). */
+export type CreateScanResult = { scanId: string };
+
+/** Response of GET /api/scans/:id/status, polled while a scan runs. */
+export type ScanStatusResult = {
+  status: ScanStatus;
+  stage: ScanStage | null;
+  updatedAt: string;
+  error: ScanError | null;
+};
+
+/** Response of GET /api/scans/:id. The report fields are null until the scan is complete. */
+export type ScanDetail = ScanStatusResult & {
+  id: string;
+  createdAt: string;
+  /** When a guest-owned scan will be deleted; null for account-owned scans. */
+  expiresAt: string | null;
+  engineVersion: string;
+  resume: { id: string; fileName: string; pageCount: number; wordCount: number };
+  summary: ScanSummary | null;
+  ats: import("@/lib/ats/types").AtsReport | null;
+  ai: { status: ScanAiStatus } | null;
+  durationMs: number | null;
+};

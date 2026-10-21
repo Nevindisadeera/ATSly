@@ -14,5 +14,8 @@ export default defineConfig({
     setupFiles: ["tests/support/setup-env.ts"],
     // The first run downloads a MongoDB binary for the in-memory test database.
     hookTimeout: 120_000,
+    // Integration tests parse real PDFs in parallel files; a cold pdf.js load under that
+    // load can take several seconds, past Vitest's 5 s default.
+    testTimeout: 30_000,
   },
 });
