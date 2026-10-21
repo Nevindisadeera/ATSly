@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef } from "react";
 import { CircleAlert } from "lucide-react";
 
-import { useUpload } from "@/hooks/use-upload";
+import type { useUpload } from "@/hooks/use-upload";
 
 import { FileSummaryCard } from "./file-summary-card";
 import { UploadDropzone } from "./upload-dropzone";
@@ -13,8 +13,8 @@ import { uploadErrorMessage } from "./upload-messages";
  * Step 1 of the scan flow. Client-side validation errors stay under the dropzone so the
  * user can try again in place; once a file is accepted, the summary card takes over.
  */
-export function UploadStep() {
-  const { state, select, reject, cancel, reset } = useUpload();
+export function UploadStep({ upload }: { upload: ReturnType<typeof useUpload> }) {
+  const { state, select, reject, cancel, reset } = upload;
   const errorId = useId();
   const dropzoneWrapper = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLElement>(null);

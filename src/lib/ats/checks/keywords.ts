@@ -1,6 +1,7 @@
 import { ACRONYMS, findSkillsInText } from "@/lib/taxonomy";
 import type { ParsedResume } from "@/lib/parsing/types";
 
+import { recognizedSkillUsage, workText } from "../skills";
 import { buzzwordCount, countTerm, percent, plural, wordsOf } from "../text-metrics";
 import type { Check } from "../types";
 import { englishOnly, notApplicable, pass, problem, sample } from "./helpers";
@@ -9,14 +10,6 @@ import { englishOnly, notApplicable, pass, problem, sample } from "./helpers";
  * Keywords & skills (weight 15): job-independent keyword hygiene — §18.4.
  * Role-specific keyword coverage belongs to job matching (Phase 9a), not this score.
  */
-
-/** Text where skills are shown in use: experience and project entries. */
-function workText(resume: ParsedResume): string {
-  return [
-    ...resume.experience.map((e) => e.rawText),
-    ...resume.projects.map((p) => p.rawText),
-  ].join("\n");
-}
 
 /** Hard skills listed in the skills section and recognized by the taxonomy. */
 function listedHardSkills(resume: ParsedResume) {
@@ -85,13 +78,12 @@ export const keywordChecks: Check[] = [
     fix: "Mention your key skills in your experience or projects too, showing where you used them.",
     strength: "Listed skills are backed up by your experience",
     run({ resume }) {
-      const listed = listedHardSkills(resume);
+      const listed = recognizedSkillUsage(resume).filter((u) => u.skill.kind !== "soft");
       if (listed.length < 3)
         return notApplicable(
           "Needs at least three recognized skills in a skills section.",
         );
-      const used = new Set(findSkillsInText(workText(resume)).map((s) => s.id));
-      const unbacked = listed.filter((s) => !used.has(s.taxonomyId!));
+      const unbacked = listed.filter((u) => !u.backed).map((u) => u.skill);
       const share = percent(listed.length - unbacked.length, listed.length);
       if (share >= 60)
         return pass(
