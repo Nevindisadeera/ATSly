@@ -199,7 +199,8 @@ export const structureChecks: Check[] = [
     maxDeduction: 20,
     severity: "major",
     confidence: "high",
-    fix: "Aim for one page per five to ten years of experience, and no more than two pages for most roles.",
+    // One fix for both directions: S08 fails for resumes that are too long or too short.
+    fix: "Keep it to one or two pages (three only with over ten years of experience), with at least 250 words so ATS systems have enough to match.",
     strength: "A sensible length for your experience",
     run({ resume }) {
       const { pageCount, wordCount, totalExperienceMonths } = resume.stats;

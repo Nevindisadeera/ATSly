@@ -66,7 +66,7 @@ Overall = round(Σ category score × weight ÷ 100).
 | S05 | Roles missing a title or company | Any role without a clear title or company: −10. | 10 | major | medium | Give every role a job title and a company name on its own line or separated by a comma. |
 | S06 | Mixed date formats | Dates written in more than one format: −6. | 6 | minor | high | Write every date the same way, for example “Mar 2021”. |
 | S07 | Roles not in reverse-chronological order | Dated roles not listed most recent first: −6. Needs two dated roles. | 6 | minor | high | List your most recent role first. |
-| S08 | Resume length | More than 3 pages: −20. More than 2 pages with under 10 years of experience: −10. Under 250 words: −15. | 20 | major | high | Aim for one page per five to ten years of experience, and no more than two pages for most roles. |
+| S08 | Resume length | More than 3 pages: −20. More than 2 pages with under 10 years of experience: −10. Under 250 words: −15. | 20 | major | high | Keep it to one or two pages (three only with over ten years of experience), with at least 250 words so ATS systems have enough to match. |
 | S09 | Headings that don't stand out | Any heading that looks like body text: −8. | 8 | minor | medium | Make headings bold, larger or in capitals so both ATS parsers and readers can find sections. |
 | S10 | Repeated sections | The same kind of section appears more than once: −6. | 6 | minor | medium | Combine sections of the same kind under one heading. |
 

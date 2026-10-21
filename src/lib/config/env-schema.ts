@@ -12,6 +12,10 @@ export const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
   /** Uploads allowed per IP address per hour (Phase 4b). */
   RATE_LIMIT_UPLOADS_PER_HOUR: z.coerce.number().int().positive().default(15),
+  /** Scans allowed per guest, per signed-in user and per IP address per day (Phase 7b). */
+  RATE_LIMIT_SCANS_GUEST_PER_DAY: z.coerce.number().int().positive().default(3),
+  RATE_LIMIT_SCANS_USER_PER_DAY: z.coerce.number().int().positive().default(20),
+  RATE_LIMIT_SCANS_IP_PER_DAY: z.coerce.number().int().positive().default(10),
   /**
    * MongoDB connection string (Phase 6). Optional at build time so pages build without a
    * database; any request that needs the database fails with 503 until it is set.

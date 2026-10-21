@@ -9,6 +9,9 @@ describe("parseEnv", () => {
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
       LOG_LEVEL: "info",
       RATE_LIMIT_UPLOADS_PER_HOUR: 15,
+      RATE_LIMIT_SCANS_GUEST_PER_DAY: 3,
+      RATE_LIMIT_SCANS_USER_PER_DAY: 20,
+      RATE_LIMIT_SCANS_IP_PER_DAY: 10,
       GUEST_RETENTION_DAYS: 7,
     });
   });
