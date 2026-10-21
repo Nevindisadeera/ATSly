@@ -73,8 +73,9 @@ export function uploadReducer(state: UploadState, action: UploadAction): UploadS
   }
 }
 
-export function useUpload() {
-  const [state, dispatch] = useReducer(uploadReducer, initialUploadState);
+/** `initial` starts the flow from an already-uploaded resume (/scan?resume=…). */
+export function useUpload(initial: UploadState = initialUploadState) {
+  const [state, dispatch] = useReducer(uploadReducer, initial);
   const controller = useRef<AbortController | null>(null);
 
   const select = useCallback(async (file: File) => {

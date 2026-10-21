@@ -1,8 +1,38 @@
 import { Check } from "lucide-react";
+import { cn } from "cn";
 
 import { BandChip, ScoreBar, ScoreRing, SeverityDot } from "@/components/data-display";
+import { BAND_META } from "@/components/data-display/tone";
 import type { ReportView } from "@/lib/report/types";
+import type { Band } from "@/types/report";
 import { pluralize } from "@/lib/utils/format";
+
+/** A score ring at 168px, or 120px on phones (§12), with its band chip below. */
+function HeroRing({
+  value,
+  band,
+  label,
+  caption,
+  chip,
+}: {
+  value: number;
+  band: Band;
+  label: string;
+  caption?: string;
+  chip: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="hidden sm:block">
+        <ScoreRing value={value} band={band} label={label} caption={caption} size={168} />
+      </div>
+      <div className="sm:hidden">
+        <ScoreRing value={value} band={band} label={label} caption={caption} size={120} />
+      </div>
+      <BandChip band={band}>{chip}</BandChip>
+    </div>
+  );
+}
 
 /** Score hero and overview — docs/PLANNING.md §7.3, sections 2 and 3. */
 export function OverviewSection({ view }: { view: ReportView }) {
@@ -13,26 +43,30 @@ export function OverviewSection({ view }: { view: ReportView }) {
       </h2>
 
       <div className="rounded-lg border border-border bg-background p-6 sm:p-8">
-        <div className="grid gap-8 md:grid-cols-[auto_minmax(0,1fr)] md:items-start">
-          <div className="flex flex-col items-center gap-4">
-            {/* 168px on larger screens, 120px on phones (§12). */}
-            <div className="hidden sm:block">
-              <ScoreRing
-                value={view.score}
-                band={view.band}
-                label="ATS score"
-                size={168}
+        {/* With a job match the two rings sit side by side above the text (§7.3). */}
+        <div
+          className={cn(
+            "grid gap-8",
+            !view.match && "md:grid-cols-[auto_minmax(0,1fr)] md:items-start",
+          )}
+        >
+          <div className="flex flex-wrap items-start justify-center gap-x-10 gap-y-6 md:justify-start">
+            <HeroRing
+              value={view.score}
+              band={view.band}
+              label="ATS score"
+              caption={view.match ? "ATS score" : undefined}
+              chip={view.bandDescription}
+            />
+            {view.match ? (
+              <HeroRing
+                value={view.match.score}
+                band={view.match.band}
+                label="Job match"
+                caption="Job match"
+                chip={`${BAND_META[view.match.band].label} match`}
               />
-            </div>
-            <div className="sm:hidden">
-              <ScoreRing
-                value={view.score}
-                band={view.band}
-                label="ATS score"
-                size={120}
-              />
-            </div>
-            <BandChip band={view.band}>{view.bandDescription}</BandChip>
+            ) : null}
           </div>
 
           <div className="min-w-0">

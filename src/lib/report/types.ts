@@ -1,6 +1,12 @@
 import type { CategoryKey, CheckStatus, Evidence } from "@/lib/ats/types";
 import type { ResumeSectionKind } from "@/types/api";
-import type { AtsBand, Severity } from "@/types/report";
+import type {
+  FitStatus,
+  Importance,
+  MatchComponentKey,
+  TermKind,
+} from "@/lib/matching/types";
+import type { AtsBand, MatchBand, Severity } from "@/types/report";
 
 /**
  * View models for the results page — docs/PLANNING.md §7.3. Built on the server from a scan
@@ -116,4 +122,57 @@ export type ReportView = {
   keywords: KeywordsView | null;
   parsed: ParsedResumeView | null;
   engineVersion: string;
+  /** The job this scan was matched against. */
+  job: { title: string | null; company: string | null } | null;
+  /** Null when the scan had no job description. */
+  match: MatchView | null;
+  /** The resume is still stored, so it can be scanned again against another job. */
+  canRescan: boolean;
+};
+
+export type MatchComponentView = {
+  key: MatchComponentKey;
+  label: string;
+  weight: number;
+  /** Effective weight after redistribution, to one decimal (12.5); 0 when not assessed. */
+  effectiveWeight: number;
+  score: number | null;
+  note?: string;
+};
+
+export type MatchedTermView = {
+  term: string;
+  kind: TermKind;
+  importance: Importance;
+  /** "Exact match", "Matched as a related term" or "Matched by AI". */
+  how: string;
+  evidence?: string;
+  location?: string;
+};
+
+export type MissingTermView = { term: string; kind: TermKind; suggestion: string };
+
+export type FitRowView = {
+  key: "experience" | "education" | "title";
+  label: string;
+  status: FitStatus;
+  /** "Meets", "Close", "Gap", "Exceeds" or "Not specified". */
+  statusLabel: string;
+  detail: string;
+};
+
+export type MatchView = {
+  score: number;
+  band: MatchBand;
+  components: MatchComponentView[];
+  /** Some components couldn't be assessed and their weight was shared out. */
+  redistributed: boolean;
+  matchedRequired: MatchedTermView[];
+  matchedPreferred: MatchedTermView[];
+  missingRequired: MissingTermView[];
+  missingPreferred: MissingTermView[];
+  fit: FitRowView[];
+  honestyFlags: string[];
+  strongMatches: { requirement: string; evidence: string }[];
+  weakMatches: { requirement: string; reason: string }[];
 };

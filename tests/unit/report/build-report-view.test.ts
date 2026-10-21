@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { runAtsEngine } from "@/lib/ats";
+import { runMatchEngine, type JobRequirements } from "@/lib/matching";
 import type { ParsedResume } from "@/lib/parsing";
 import { buildReportView, topActions } from "@/lib/report/build-report-view";
 import { summarizeAts } from "@/lib/services/scan-pipeline";
@@ -178,5 +179,100 @@ describe("buildReportView", () => {
   it("refuses a scan that isn't complete", () => {
     const scan = { ...scanOf(draft()), status: "running" as const };
     expect(() => buildReportView(scan, null)).toThrow();
+  });
+});
+
+describe("job match view", () => {
+  const job: JobRequirements = {
+    jobTitle: "Senior Backend Engineer",
+    seniority: "senior",
+    yearsExperience: { min: 5, max: null },
+    education: { level: "bachelor", field: null, required: true },
+    hardSkills: [
+      { name: "Python", kind: "technology", importance: "required" },
+      { name: "Kubernetes", kind: "tool", importance: "required" },
+      { name: "Rust", kind: "technology", importance: "required" },
+      { name: "Terraform", kind: "tool", importance: "preferred" },
+      { name: "Scala", kind: "technology", importance: "preferred" },
+    ],
+    softSkills: ["Communication"],
+    certifications: [],
+    responsibilities: [],
+    domain: null,
+  };
+
+  function matchedScan() {
+    const d = draft();
+    const match = runMatchEngine({ resume: d.parsed, job });
+    const scan = scanOf(d);
+    return {
+      d,
+      match,
+      scan: {
+        ...scan,
+        job: {
+          id: "6ad85378fe232d218e42742a",
+          title: "Senior Backend Engineer",
+          company: "Northwind",
+        },
+        match,
+        summary: summarizeAts(scan.ats!, match),
+      },
+    };
+  }
+
+  it("splits matched and missing terms by importance, with how each matched", () => {
+    const { scan, d } = matchedScan();
+    const view = buildReportView(scan, d.parsed).match!;
+    expect(view.matchedRequired.map((t) => t.term)).toEqual(["Python", "Kubernetes"]);
+    expect(view.matchedRequired[0]).toMatchObject({
+      how: "Exact match",
+      location: expect.stringMatching(/^Experience › /),
+    });
+    expect(view.missingRequired.map((t) => t.term)).toEqual(["Rust"]);
+    expect(view.matchedPreferred.map((t) => t.term)).toEqual(["Terraform"]);
+    expect(view.missingPreferred.map((t) => t.term)).toEqual(["Scala"]);
+    // Soft skills aren't listed as requirements.
+    expect(
+      [...view.matchedRequired, ...view.matchedPreferred].some((t) => t.kind === "soft"),
+    ).toBe(false);
+  });
+
+  it("shows effective weights to one decimal and flags redistribution", () => {
+    const { scan, d } = matchedScan();
+    const view = buildReportView(scan, d.parsed).match!;
+    const weights = Object.fromEntries(
+      view.components.map((c) => [c.key, c.effectiveWeight]),
+    );
+    expect(weights).toEqual({
+      required_skills: 50,
+      preferred_skills: 12.5,
+      responsibilities: 0,
+      experience: 12.5,
+      education: 12.5,
+      title: 12.5,
+    });
+    expect(view.components.reduce((sum, c) => sum + c.effectiveWeight, 0)).toBe(100);
+    expect(view.redistributed).toBe(true);
+    expect(view.fit.map((f) => [f.label, f.statusLabel])).toEqual([
+      ["Experience", "Meets"],
+      ["Education & certifications", "Meets"],
+      ["Title & seniority", "Meets"],
+    ]);
+  });
+
+  it("carries the job, the match headline and re-scan availability", () => {
+    const { scan, d } = matchedScan();
+    const view = buildReportView(scan, d.parsed);
+    expect(view.job).toEqual({ title: "Senior Backend Engineer", company: "Northwind" });
+    expect(
+      view.headline.endsWith(`Keyword coverage for this role is ${scan.match.band}.`),
+    ).toBe(true);
+    expect(view.canRescan).toBe(true);
+    expect(buildReportView(scan, null).canRescan).toBe(false);
+    expect(buildReportView(scanOf(draft()), d.parsed)).toMatchObject({
+      job: null,
+      match: null,
+    });
   });
 });

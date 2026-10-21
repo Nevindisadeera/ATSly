@@ -13,7 +13,13 @@ import { uploadErrorMessage } from "./upload-messages";
  * Step 1 of the scan flow. Client-side validation errors stay under the dropzone so the
  * user can try again in place; once a file is accepted, the summary card takes over.
  */
-export function UploadStep({ upload }: { upload: ReturnType<typeof useUpload> }) {
+type UploadStepProps = {
+  upload: ReturnType<typeof useUpload>;
+  /** Overrides the card's replace action, e.g. "Use a different resume" on a re-scan. */
+  replace?: { label: string; onReplace: () => void };
+};
+
+export function UploadStep({ upload, replace }: UploadStepProps) {
   const { state, select, reject, cancel, reset } = upload;
   const errorId = useId();
   const dropzoneWrapper = useRef<HTMLDivElement>(null);
@@ -66,7 +72,8 @@ export function UploadStep({ upload }: { upload: ReturnType<typeof useUpload> })
       ref={card}
       state={state as Exclude<typeof state, { phase: "idle" }>}
       onCancel={cancel}
-      onReplace={reset}
+      onReplace={replace?.onReplace ?? reset}
+      replaceLabel={replace?.label}
       errorId={errorId}
     />
   );

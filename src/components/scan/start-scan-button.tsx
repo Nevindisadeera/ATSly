@@ -7,13 +7,17 @@ import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
 import type { ClientFailure } from "@/lib/client/api-response";
-import { startScan } from "@/lib/client/scans";
+import { startScan, type JobDescriptionPayload } from "@/lib/client/scans";
 
 import { startScanErrorMessage } from "./start-scan-messages";
 
 type StartScanButtonProps = {
   /** The uploaded resume to scan; the button is disabled without one. */
   resumeId: string | null;
+  /** Sent with the scan when present (job matching). */
+  jobDescription?: JobDescriptionPayload;
+  /** Disables the button for reasons the caller explains, e.g. a too-long job description. */
+  disabled?: boolean;
   label: string;
   /** Shown with a spinner while the scan starts and the results page loads. */
   pendingLabel?: string;
@@ -28,6 +32,8 @@ type StartScanButtonProps = {
  */
 export function StartScanButton({
   resumeId,
+  jobDescription,
+  disabled = false,
   label,
   pendingLabel = "Starting analysis…",
   variant = "primary",
@@ -40,10 +46,10 @@ export function StartScanButton({
   const [failure, setFailure] = useState<ClientFailure | null>(null);
 
   async function start() {
-    if (!resumeId || pending) return;
+    if (!resumeId || disabled || pending) return;
     setPending(true);
     setFailure(null);
-    const outcome = await startScan(resumeId);
+    const outcome = await startScan(resumeId, { jobDescription });
     if (outcome.ok) {
       // Stay in the pending state until the results page replaces this one.
       router.push(`/results/${outcome.data.scanId}`);
@@ -62,7 +68,7 @@ export function StartScanButton({
         variant={variant}
         size={size}
         loading={pending}
-        disabled={!resumeId}
+        disabled={!resumeId || disabled}
         aria-describedby={message ? errorId : undefined}
         onClick={start}
         className="w-full sm:w-fit"

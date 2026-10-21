@@ -2,6 +2,7 @@ import "server-only";
 
 import { BAND_DESCRIPTIONS, recognizedSkillUsage } from "@/lib/ats";
 import type { AtsReport, CategoryKey, CheckResult } from "@/lib/ats/types";
+import type { MatchedTerm, MatchReport } from "@/lib/matching/types";
 import type { ParsedResume } from "@/lib/parsing/types";
 import { formatDate, formatDateRange } from "@/lib/utils/format";
 import { SECTION_LABELS } from "@/lib/utils/section-labels";
@@ -11,6 +12,8 @@ import type {
   CheckView,
   IssueGroupView,
   KeywordsView,
+  MatchedTermView,
+  MatchView,
   ParsedEntryView,
   ParsedResumeView,
   ParsedSectionView,
@@ -211,6 +214,73 @@ export function buildParsedView(resume: ParsedResume): ParsedResumeView {
   return { contact, contactFlags, sections, otherSections };
 }
 
+const MATCH_HOW: Record<MatchedTerm["matchType"], string> = {
+  exact: "Exact match",
+  normalized: "Matched as a related term",
+  semantic: "Matched by AI",
+};
+
+const FIT_STATUS: Record<MatchView["fit"][number]["status"], string> = {
+  meets: "Meets",
+  exceeds: "Exceeds",
+  close: "Close",
+  gap: "Gap",
+  not_specified: "Not specified",
+};
+
+const FIT_LABELS = {
+  experience: "Experience",
+  education: "Education & certifications",
+  title: "Title & seniority",
+} as const;
+
+/** The job match section — docs/PLANNING.md §7.3, section 7, and §19.3. */
+export function buildMatchView(match: MatchReport): MatchView {
+  const matched = (importance: "required" | "preferred"): MatchedTermView[] =>
+    match.matched
+      .filter((m) => m.importance === importance && m.kind !== "soft")
+      .map((m) => ({
+        term: m.term,
+        kind: m.kind,
+        importance: m.importance,
+        how: MATCH_HOW[m.matchType],
+        evidence: m.evidence,
+        location: m.location,
+      }));
+  const missing = (importance: "required" | "preferred") =>
+    match.missing
+      .filter((m) => m.importance === importance)
+      .map((m) => ({ term: m.term, kind: m.kind, suggestion: m.suggestion }));
+
+  return {
+    score: match.score,
+    band: match.band,
+    components: match.components.map((c) => ({
+      key: c.key,
+      label: c.label,
+      weight: c.weight,
+      effectiveWeight: Math.round(c.effectiveWeight * 10) / 10,
+      score: c.score,
+      note: c.note,
+    })),
+    redistributed: match.components.some((c) => c.score === null),
+    matchedRequired: matched("required"),
+    matchedPreferred: matched("preferred"),
+    missingRequired: missing("required"),
+    missingPreferred: missing("preferred"),
+    fit: (["experience", "education", "title"] as const).map((key) => ({
+      key,
+      label: FIT_LABELS[key],
+      status: match.fit[key].status,
+      statusLabel: FIT_STATUS[match.fit[key].status],
+      detail: match.fit[key].detail,
+    })),
+    honestyFlags: match.honestyFlags,
+    strongMatches: match.strongMatches,
+    weakMatches: match.weakMatches,
+  };
+}
+
 /**
  * The results page view of a complete scan. `resume` is null when the resume behind the
  * report is no longer stored; the report itself is self-contained.
@@ -237,7 +307,8 @@ export function buildReportView(
     score: ats.score,
     band: ats.band,
     bandDescription: BAND_DESCRIPTIONS[ats.band],
-    headline: ats.headline,
+    // The summary headline gains the match sentence when there is a job (§18.6).
+    headline: scan.summary.headline,
     topActions: topActions(ats),
     categories: ats.categories.map((c) => ({
       key: c.key as CategoryKey,
@@ -254,5 +325,8 @@ export function buildReportView(
     keywords: resume ? buildKeywordsView(ats, resume) : null,
     parsed: resume ? buildParsedView(resume) : null,
     engineVersion: ats.engineVersion,
+    job: scan.job ? { title: scan.job.title, company: scan.job.company } : null,
+    match: scan.match ? buildMatchView(scan.match) : null,
+    canRescan: resume !== null,
   };
 }
