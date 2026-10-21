@@ -5,6 +5,7 @@ import { educationFit, experienceFit, titleFit } from "./fit";
 import { createMatcher, type Requirement } from "./match";
 import type {
   JobRequirements,
+  SemanticAssessment,
   MatchComponent,
   MatchComponentKey,
   MatchedTerm,
@@ -13,7 +14,7 @@ import type {
 } from "./types";
 
 /** Matching engine version — bump whenever tiers, fits, weights or extraction change. */
-export const MATCH_ENGINE_VERSION = "1.0.0";
+export const MATCH_ENGINE_VERSION = "1.1.0";
 
 /** Component weights — docs/PLANNING.md §19.2. They sum to 100. */
 export const MATCH_WEIGHTS: Record<MatchComponentKey, number> = {
@@ -35,7 +36,7 @@ export const MATCH_LABELS: Record<MatchComponentKey, string> = {
 };
 
 const NOT_SPECIFIED = "Not specified in the job description.";
-const NEEDS_AI = "Assessed by AI analysis, which wasn't part of this scan.";
+const NEEDS_AI = "Assessed by AI analysis, which wasn't available for this scan.";
 
 /** Match bands — §19.2. */
 export function matchBandFor(score: number): MatchBand {
@@ -94,13 +95,38 @@ export function aggregate(
   return { score: total === 0 ? 0 : Math.round(weighted / total), components };
 }
 
-export type MatchInput = { resume: ParsedResume; job: JobRequirements };
+/** Responsibility alignment comes from AI only; without it, or without listed duties, it's na. */
+function responsibilityScore(
+  job: JobRequirements,
+  assessment: SemanticAssessment | null | undefined,
+): { score: number | null; note?: string } {
+  if (job.responsibilities.length === 0) return { score: null, note: NOT_SPECIFIED };
+  const alignment = assessment?.responsibilityAlignment;
+  if (!alignment) return { score: null, note: NEEDS_AI };
+  return { score: Math.min(100, Math.max(0, Math.round(alignment.score))) };
+}
+
+export type MatchInput = {
+  resume: ParsedResume;
+  job: JobRequirements;
+  /** Verified AI assessment: adds the semantic tier and responsibility alignment. */
+  assessment?: SemanticAssessment | null;
+};
+
+/**
+ * Credit for a semantic match — §19.2: yes with high confidence counts fully; yes with
+ * medium confidence, or partial, counts half; low confidence counts nothing.
+ */
+export function semanticCredit(item: SemanticAssessment["coverage"][number]): number {
+  if (item.covered === "no" || item.confidence === "low" || !item.evidence) return 0;
+  return item.covered === "yes" && item.confidence === "high" ? 1 : 0.5;
+}
 
 /**
  * Scores how well a resume matches a job's requirements — docs/PLANNING.md §19.
  * Deterministic tiers only; AI adds the semantic tier and responsibility alignment later.
  */
-export function runMatchEngine({ resume, job }: MatchInput): MatchReport {
+export function runMatchEngine({ resume, job, assessment }: MatchInput): MatchReport {
   const matcher = createMatcher(resume);
   const matched: MatchedTerm[] = [];
   const missing: MissingTerm[] = [];
@@ -117,10 +143,31 @@ export function runMatchEngine({ resume, job }: MatchInput): MatchReport {
       importance: c.importance,
     })),
   ];
+  const coverageByTerm = new Map(
+    (assessment?.coverage ?? []).map((c) => [c.requirement.toLowerCase(), c]),
+  );
   for (const requirement of requirements) {
     const hit = matcher.match(requirement);
-    if (hit) matched.push(hit);
-    else
+    if (hit) {
+      matched.push(hit);
+      continue;
+    }
+    // A certification is held or not, so it only matches by name or alias.
+    const semantic =
+      requirement.kind === "certification"
+        ? undefined
+        : coverageByTerm.get(requirement.term.toLowerCase());
+    const credit = semantic ? semanticCredit(semantic) : 0;
+    if (semantic && credit > 0) {
+      matched.push({
+        term: requirement.term,
+        kind: requirement.kind,
+        importance: requirement.importance,
+        matchType: "semantic",
+        evidence: semantic.evidence ?? undefined,
+        ...(credit < 1 ? { partial: true } : {}),
+      });
+    } else
       missing.push({
         term: requirement.term,
         kind: requirement.kind,
@@ -134,23 +181,24 @@ export function runMatchEngine({ resume, job }: MatchInput): MatchReport {
     if (hit) matched.push(hit);
   }
 
-  const count = (
-    importance: "required" | "preferred",
-    list: { kind: string; importance: string }[],
-  ) =>
-    list.filter(
-      (t) =>
-        t.importance === importance && t.kind !== "certification" && t.kind !== "soft",
-    ).length;
-  const requiredMatched = count("required", matched);
-  const requiredTotal = requiredMatched + count("required", missing);
-  const preferredMatched = count("preferred", matched);
-  const preferredTotal = preferredMatched + count("preferred", missing);
+  const isSkill = (t: { kind: string }) =>
+    t.kind !== "certification" && t.kind !== "soft";
+  const credit = (importance: "required" | "preferred") =>
+    matched
+      .filter((t) => t.importance === importance && isSkill(t))
+      .reduce((sum, t) => sum + (t.partial ? 0.5 : 1), 0);
+  const total = (importance: "required" | "preferred") =>
+    [...matched, ...missing].filter((t) => t.importance === importance && isSkill(t))
+      .length;
+  const requiredMatched = credit("required");
+  const requiredTotal = total("required");
+  const preferredMatched = credit("preferred");
+  const preferredTotal = total("preferred");
 
   const certifications = {
-    matched: matched.filter(
-      (t) => t.kind === "certification" && t.importance === "required",
-    ).length,
+    matched: matched
+      .filter((t) => t.kind === "certification" && t.importance === "required")
+      .reduce((sum, t) => sum + (t.partial ? 0.5 : 1), 0),
     total: job.certifications.filter((c) => c.importance === "required").length,
   };
 
@@ -169,7 +217,7 @@ export function runMatchEngine({ resume, job }: MatchInput): MatchReport {
       score: preferredScore,
       note: preferredScore === null ? NOT_SPECIFIED : undefined,
     },
-    responsibilities: { score: null, note: NEEDS_AI },
+    responsibilities: responsibilityScore(job, assessment),
     experience: {
       score: experience.score,
       note: experience.score === null ? NOT_SPECIFIED : undefined,
@@ -182,12 +230,17 @@ export function runMatchEngine({ resume, job }: MatchInput): MatchReport {
   });
 
   const honestyFlags = [
-    experience.flag,
-    education.flag,
-    ...missing
-      .filter((t) => t.kind === "certification" && t.importance === "required")
-      .map((t) => `The posting requires ${t.term}, which isn't on your resume.`),
-  ].filter((flag): flag is string => Boolean(flag));
+    ...new Set(
+      [
+        experience.flag,
+        education.flag,
+        ...missing
+          .filter((t) => t.kind === "certification" && t.importance === "required")
+          .map((t) => `The posting requires ${t.term}, which isn't on your resume.`),
+        ...(assessment?.honestyFlags ?? []),
+      ].filter((flag): flag is string => Boolean(flag)),
+    ),
+  ];
   if (components.every((c) => c.score === null)) {
     honestyFlags.unshift(
       "We couldn't find specific requirements in this job description, so the match score isn't meaningful.",
@@ -204,8 +257,14 @@ export function runMatchEngine({ resume, job }: MatchInput): MatchReport {
       (a, b) =>
         Number(a.importance === "preferred") - Number(b.importance === "preferred"),
     ),
-    strongMatches: [],
-    weakMatches: [],
+    strongMatches: (assessment?.responsibilityAlignment?.strong ?? []).map((s) => ({
+      requirement: s.responsibility,
+      evidence: s.evidence,
+    })),
+    weakMatches: (assessment?.responsibilityAlignment?.weak ?? []).map((w) => ({
+      requirement: w.responsibility,
+      reason: w.reason,
+    })),
     fit: { experience: experience.row, education: education.row, title: title.row },
     honestyFlags: honestyFlags.slice(0, 5),
     version: MATCH_ENGINE_VERSION,

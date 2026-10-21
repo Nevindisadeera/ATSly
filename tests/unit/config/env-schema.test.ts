@@ -13,6 +13,9 @@ describe("parseEnv", () => {
       RATE_LIMIT_SCANS_USER_PER_DAY: 20,
       RATE_LIMIT_SCANS_IP_PER_DAY: 10,
       GUEST_RETENTION_DAYS: 7,
+      OPENAI_MODEL: "gpt-4.1-mini",
+      AI_TIMEOUT_MS: 25_000,
+      AI_DAILY_BUDGET_USD: 5,
     });
   });
 

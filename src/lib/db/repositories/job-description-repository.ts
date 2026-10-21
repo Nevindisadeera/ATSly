@@ -91,6 +91,24 @@ export const jobDescriptionRepository = {
     });
   },
 
+  /** Replaces the rules extraction with a merged AI one (Phase 10a). */
+  saveExtraction(
+    owner: Owner,
+    id: string,
+    update: {
+      extracted: JobRequirements;
+      extractionSource: "ai" | "rules";
+      promptVersion: string;
+    },
+  ): Promise<void> {
+    return withDb(async () => {
+      await JobDescriptionModel.updateOne(
+        { _id: id, ...ownerFilter(owner) },
+        { $set: update },
+      );
+    });
+  },
+
   extendExpiry(owner: Owner, id: string, expiresAt: Date): Promise<void> {
     return withDb(async () => {
       await JobDescriptionModel.updateOne(

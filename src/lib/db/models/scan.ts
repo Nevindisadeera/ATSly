@@ -1,6 +1,7 @@
 import { model, models, Schema, type Model, type Types } from "mongoose";
 
 import type {
+  ScanAiRecord,
   ScanAiStatus,
   ScanErrorCode,
   ScanStage,
@@ -73,7 +74,25 @@ const ScanSchema = new Schema(
     ats: { type: Schema.Types.Mixed },
     ai: {
       type: new Schema(
-        { status: { type: String, enum: AI_STATUSES, required: true } },
+        {
+          status: { type: String, enum: AI_STATUSES, required: true },
+          skippedReason: { type: String, enum: ["disabled", "not_configured", "budget"] },
+          contentQuality: { type: Number, min: 0, max: 100 },
+          /** Merged recommendations (rules and verified AI); typed in code. */
+          recommendations: { type: [Schema.Types.Mixed], default: undefined },
+          usage: {
+            type: new Schema(
+              { promptTokens: Number, completionTokens: Number, costUsd: Number },
+              { _id: false },
+            ),
+            default: undefined,
+          },
+          latencyMs: { type: Number },
+          verification: {
+            type: new Schema({ checked: Number, dropped: Number }, { _id: false }),
+            default: undefined,
+          },
+        },
         { _id: false },
       ),
       default: undefined,
@@ -118,7 +137,7 @@ export type ScanDocument = {
   promptVersion?: string | null;
   model?: string | null;
   ats?: unknown;
-  ai?: { status: ScanAiStatus } | null;
+  ai?: ScanAiRecord | null;
   match?: unknown;
   summary?: ScanSummary | null;
   jobSnapshot?: { title?: string | null; company?: string | null } | null;

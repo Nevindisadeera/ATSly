@@ -35,7 +35,12 @@ function scanOf(d: Draft): ScanDetail {
     ats,
     job: null,
     match: null,
-    ai: { status: "skipped" },
+    ai: {
+      status: "skipped",
+      skippedReason: null,
+      contentQuality: null,
+      recommendations: [],
+    },
     durationMs: 120,
   };
 }

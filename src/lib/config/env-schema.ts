@@ -28,6 +28,18 @@ export const envSchema = z.object({
   AUTH_SECRET: z.string().min(32, "must be at least 32 characters").optional(),
   /** Days before data owned by a guest (no account) is deleted. */
   GUEST_RETENTION_DAYS: z.coerce.number().int().min(1).max(90).default(7),
+  /**
+   * AI analysis (Phase 10a). "mock" is a deterministic offline provider for development and
+   * tests; "openai" needs OPENAI_API_KEY. Without a key the default is mock.
+   */
+  AI_PROVIDER: z.enum(["openai", "mock", "off"]).optional(),
+  OPENAI_API_KEY: z.string().min(1).optional(),
+  /** Model for all three tasks; the eval set (npm run eval:ai) is how a model is chosen. */
+  OPENAI_MODEL: z.string().min(1).default("gpt-4.1-mini"),
+  /** Per-call timeout. */
+  AI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(25_000),
+  /** Global daily AI spend cap in US dollars; scans skip AI once it's reached. */
+  AI_DAILY_BUDGET_USD: z.coerce.number().min(0).default(5),
 });
 
 export type Env = z.infer<typeof envSchema>;

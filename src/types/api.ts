@@ -81,6 +81,30 @@ export type ScanError = { code: ScanErrorCode; message: string; retryable: boole
 /** AI analysis outcome. Until AI analysis exists (Phase 10a) every scan is "skipped". */
 export type ScanAiStatus = "complete" | "partial" | "skipped" | "failed";
 
+/** Why AI didn't run: switched off, no API key, or today's spend cap reached. */
+export type ScanAiSkipReason = "disabled" | "not_configured" | "budget";
+
+/** Everything AI analysis stored on a scan (Phase 10a). Usage and cost stay server-side. */
+export type ScanAiRecord = {
+  status: ScanAiStatus;
+  skippedReason?: ScanAiSkipReason;
+  /** AI content rating 0–100, used by check Q07. */
+  contentQuality?: number;
+  recommendations?: import("@/lib/ai/recommendations").StoredRecommendation[];
+  usage?: { promptTokens: number; completionTokens: number; costUsd: number };
+  latencyMs?: number;
+  /** Quotes the model made from the resume, and how many failed verification. */
+  verification?: { checked: number; dropped: number };
+};
+
+/** The AI part of a scan as the client sees it. */
+export type ScanAiDetail = {
+  status: ScanAiStatus;
+  skippedReason: ScanAiSkipReason | null;
+  contentQuality: number | null;
+  recommendations: import("@/lib/ai/recommendations").StoredRecommendation[];
+};
+
 /** Denormalized highlights of a complete scan, for lists and the results hero. */
 export type ScanSummary = {
   headline: string;
@@ -120,6 +144,6 @@ export type ScanDetail = ScanStatusResult & {
   job: { id: string; title: string | null; company: string | null } | null;
   /** Job match report; null without a job description or until the scan is complete. */
   match: import("@/lib/matching/types").MatchReport | null;
-  ai: { status: ScanAiStatus } | null;
+  ai: ScanAiDetail | null;
   durationMs: number | null;
 };

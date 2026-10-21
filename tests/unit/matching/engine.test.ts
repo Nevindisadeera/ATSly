@@ -319,11 +319,20 @@ describe("runMatchEngine", () => {
           skill("Rust"),
           skill("Terraform", "preferred"),
         ],
+        responsibilities: ["Build and operate payment services"],
       }),
     });
     const byKey = Object.fromEntries(report.components.map((c) => [c.key, c]));
     expect(byKey.responsibilities).toMatchObject({ score: null, effectiveWeight: 0 });
     expect(byKey.responsibilities!.note).toContain("AI analysis");
+    // A posting without listed duties has nothing to align with, AI or not.
+    const noDuties = runMatchEngine({
+      resume: cleanResume(),
+      job: job({ hardSkills: [skill("Python")] }),
+    });
+    expect(noDuties.components.find((c) => c.key === "responsibilities")?.note).toBe(
+      "Not specified in the job description.",
+    );
     expect(byKey.required_skills!.score).toBe(67);
     expect(byKey.preferred_skills!.score).toBe(100);
     expect(report.components.reduce((sum, c) => sum + c.effectiveWeight, 0)).toBeCloseTo(

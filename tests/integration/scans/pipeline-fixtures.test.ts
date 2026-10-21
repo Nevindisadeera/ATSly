@@ -41,14 +41,25 @@ describe.each(FIXTURES.filter((f) => !f.expect.error))("$name ($format)", (fixtu
 
     expect(scan).toMatchObject({ status: "complete", stage: null, error: null });
     const resume = (await resumeRepository.findForOwner(owner, upload.id))!;
-    const expected = runAtsEngine({
+    const input = {
       parsed: resume.parsed,
       layout: resume.extraction.layout,
       format: resume.file.extension,
       text: resume.extraction.text,
+    };
+    // Tests run the offline mock provider, so AI completes and Q07 uses its rating.
+    expect(scan.ai).toMatchObject({
+      status: "complete",
+      contentQuality: expect.any(Number),
+    });
+    const expected = runAtsEngine(input, {
+      ai: { contentQuality: scan.ai!.contentQuality! },
     });
     expect(scan.ats).toEqual(expected);
     expect(scan.summary?.atsScore).toBe(expected.score);
+    // AI can move the ATS score by at most 3 points (§18).
+    expect(Math.abs(expected.score - runAtsEngine(input).score)).toBeLessThanOrEqual(3);
+    expect(scan.ai!.recommendations.length).toBeGreaterThan(0);
     // Recorded and within the plan's p95 budget (§1: under 25 s); the first scan also loads
     // pdf.js, which is slow on a busy machine, so this isn't a tight performance check.
     expect(scan.durationMs).toBeGreaterThanOrEqual(0);

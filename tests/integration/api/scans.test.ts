@@ -159,7 +159,7 @@ describe("POST /api/scans → status → report", () => {
       status: "complete",
       engineVersion: expect.any(String),
       resume: { id: resumeId, fileName: "Jordan Rivera.pdf", pageCount: 1 },
-      ai: { status: "skipped" },
+      ai: { status: "complete", contentQuality: expect.any(Number) },
     });
     expect(scan.ats?.categories).toHaveLength(6);
     expect(scan.summary).toMatchObject({
@@ -239,9 +239,10 @@ describe("scans with a job description", () => {
       company: "Northwind Payments",
     });
     expect(scan.match?.components).toHaveLength(6);
+    // With AI (the offline mock in tests), responsibility alignment is assessed too.
     expect(
       scan.match?.components.find((c) => c.key === "responsibilities")?.score,
-    ).toBeNull();
+    ).toEqual(expect.any(Number));
     expect(scan.summary).toMatchObject({
       matchScore: scan.match!.score,
       matchBand: scan.match!.band,

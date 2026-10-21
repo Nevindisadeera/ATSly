@@ -70,6 +70,27 @@ export type MatchedTerm = {
   evidence?: string;
   /** Where in the resume, e.g. "Experience › Acme › bullet 2". */
   location?: string;
+  /** Counted as half covered (an AI judgement of "partial" or medium confidence). */
+  partial?: boolean;
+};
+
+/**
+ * The AI's view of what automatic matching missed (Phase 10a), after evidence verification:
+ * every "yes" or "partial" here quotes text that is really in the resume.
+ */
+export type SemanticAssessment = {
+  coverage: {
+    requirement: string;
+    covered: "yes" | "partial" | "no";
+    evidence: string | null;
+    confidence: "high" | "medium" | "low";
+  }[];
+  responsibilityAlignment: {
+    score: number;
+    strong: { responsibility: string; evidence: string }[];
+    weak: { responsibility: string; reason: string }[];
+  } | null;
+  honestyFlags: string[];
 };
 
 export type MissingTerm = {
