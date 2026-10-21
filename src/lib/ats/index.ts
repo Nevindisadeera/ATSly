@@ -1,5 +1,6 @@
 export { runAtsEngine, type AtsInput, type AtsOptions } from "./engine";
 export { CHECKS } from "./checks";
+export { recognizedSkillUsage, type SkillUsage } from "./skills";
 export {
   BAND_DESCRIPTIONS,
   CATEGORY_LABELS,

@@ -13,6 +13,7 @@ Server-side application code, organized by layer. React components never contain
 | `validation/` | Zod request schemas                                                  | Phase 4b      |
 | `ats/`        | Domain engine: ATS checks and scoring (pure, no I/O)                 | Phase 7a      |
 | `services/`   | Application services: orchestration and authorization                | Phase 6       |
+| `report/`     | View models for the results page, built from a scan on the server    | Phase 8       |
 | `matching/`   | Domain engine: job matching (pure, no I/O)                           | Phase 9a      |
 | `ai/`         | OpenAI adapter, prompts, schemas, evidence verification              | Phase 10a     |
 | `auth/`       | Auth.js configuration, guest identity, ownership                     | Phase 6 / 11a |
