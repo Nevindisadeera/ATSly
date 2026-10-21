@@ -42,9 +42,9 @@ test("analyzes an uploaded resume and shows the full report", async ({ page }) =
   await expect(
     page.getByRole("region", { name: "Selected file" }).getByRole("status"),
   ).toHaveText("Ready", SERVER);
-  // The job description step is skipped until job matching exists.
+  // The optional job description step comes next.
   await expect(page.getByRole("navigation", { name: "Scan progress" })).toContainText(
-    /Step 3 of 3|skipped/,
+    /Step 2 of 3|Job description/,
   );
 
   await analyze.click();

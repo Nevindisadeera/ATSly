@@ -23,18 +23,36 @@ export function GuestBanner({ deletesOn }: { deletesOn: string }) {
 
 export function ReportHeader({ view }: { view: ReportView }) {
   return (
-    <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
-        <p className="type-caption text-subtle">ATS report</p>
+        <p className="type-caption text-subtle">
+          {view.match ? "ATS and job match report" : "ATS report"}
+        </p>
         <h1 className="mt-2 type-h2 wrap-break-word">{view.fileName}</h1>
-        <p className="mt-2 text-sm text-subtle">
+        {view.job ? (
+          <p className="mt-2 text-sm text-body">
+            Matched against{" "}
+            <span className="font-medium text-foreground">
+              {view.job.title ?? "a job description"}
+            </span>
+            {view.job.company ? ` at ${view.job.company}` : null}
+          </p>
+        ) : null}
+        <p className="mt-1 text-sm text-subtle">
           Scanned {view.scannedOn} · {pluralize(view.pageCount, "page")} ·{" "}
           {pluralize(view.wordCount, "word")}
         </p>
       </div>
-      <Button asChild variant="secondary" className="w-full shrink-0 sm:w-fit">
-        <Link href="/scan">New scan</Link>
-      </Button>
+      <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+        {view.canRescan ? (
+          <Button asChild variant="outline" className="w-full sm:w-fit">
+            <Link href={`/scan?resume=${view.resumeId}`}>Scan against another job</Link>
+          </Button>
+        ) : null}
+        <Button asChild variant="secondary" className="w-full sm:w-fit">
+          <Link href="/scan">New scan</Link>
+        </Button>
+      </div>
     </header>
   );
 }

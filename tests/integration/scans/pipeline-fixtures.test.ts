@@ -49,6 +49,9 @@ describe.each(FIXTURES.filter((f) => !f.expect.error))("$name ($format)", (fixtu
     });
     expect(scan.ats).toEqual(expected);
     expect(scan.summary?.atsScore).toBe(expected.score);
-    expect(scan.durationMs).toBeLessThan(5_000);
+    // Recorded and within the plan's p95 budget (§1: under 25 s); the first scan also loads
+    // pdf.js, which is slow on a busy machine, so this isn't a tight performance check.
+    expect(scan.durationMs).toBeGreaterThanOrEqual(0);
+    expect(scan.durationMs).toBeLessThan(25_000);
   });
 });

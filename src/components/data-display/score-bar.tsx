@@ -11,6 +11,8 @@ type ScoreBarProps = {
   max?: number;
   /** Category weight shown as a muted caption, e.g. 25 renders "25% of score". */
   weight?: number;
+  /** Replaces the weight caption, e.g. "50% of match". */
+  caption?: string;
   /** Navy by default; status tones only when the value itself carries meaning. */
   tone?: Tone;
   /** Smaller type and thinner track for dense lists. */
@@ -24,6 +26,7 @@ export function ScoreBar({
   value,
   max = 100,
   weight,
+  caption,
   tone = "neutral",
   compact = false,
   animate = true,
@@ -38,19 +41,19 @@ export function ScoreBar({
   return (
     <div className={cn("grid gap-2", className)}>
       <div className="flex items-baseline justify-between gap-4">
-        <div className="flex min-w-0 items-baseline gap-2">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span
             id={labelId}
             className={cn(
-              "truncate font-medium text-foreground",
+              "min-w-0 font-medium text-pretty text-foreground",
               compact ? "text-sm" : "text-[0.9375rem]",
             )}
           >
             {label}
           </span>
-          {weight !== undefined ? (
+          {caption !== undefined || weight !== undefined ? (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {weight}% of score
+              {caption ?? `${weight}% of score`}
             </span>
           ) : null}
         </div>

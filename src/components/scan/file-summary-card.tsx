@@ -17,6 +17,8 @@ type FileSummaryCardProps = {
   state: ActiveState;
   onCancel: () => void;
   onReplace: () => void;
+  /** Label of the replace action; defaults to "Replace" (or "Choose another file" on error). */
+  replaceLabel?: string;
   /** Id for the error text so the dropzone or card can reference it. */
   errorId?: string;
   /** Receives focus when the card replaces the dropzone. */
@@ -42,6 +44,7 @@ export function FileSummaryCard({
   state,
   onCancel,
   onReplace,
+  replaceLabel,
   errorId,
   ref,
   className,
@@ -121,7 +124,8 @@ export function FileSummaryCard({
             </Button>
           ) : (
             <Button variant="ghost" size="sm" onClick={onReplace}>
-              {state.phase === "error" ? "Choose another file" : "Replace"}
+              {replaceLabel ??
+                (state.phase === "error" ? "Choose another file" : "Replace")}
             </Button>
           )}
         </div>

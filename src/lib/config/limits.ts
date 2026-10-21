@@ -14,6 +14,17 @@ export const UPLOAD_LIMITS = {
 
 export type UploadExtension = (typeof UPLOAD_LIMITS.extensions)[number];
 
+/**
+ * Job description length — docs/PLANNING.md §7.2 and §22. Below the minimum the step counts
+ * as skipped; above the maximum the server rejects it.
+ */
+export const JOB_DESCRIPTION_LIMITS = {
+  minChars: 100,
+  maxChars: 15_000,
+  /** From this length the input says the posting looks complete (§5, state 13). */
+  completeChars: 600,
+} as const;
+
 /** Value for an <input type="file" accept> attribute. */
 export const UPLOAD_ACCEPT = [
   ".pdf",

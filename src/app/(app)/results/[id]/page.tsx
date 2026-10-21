@@ -74,8 +74,11 @@ export default async function ResultsPage({ params }: PageProps<"/results/[id]">
             updatedAt: scan.updatedAt,
             error: scan.error,
           }}
-          // Job matching (9a) and AI review (10a) add their steps when they exist.
-          steps={progressSteps({ hasJobDescription: false, aiEnabled: false })}
+          // AI review adds its step with Phase 10a.
+          steps={progressSteps({
+            hasJobDescription: scan.job !== null,
+            aiEnabled: false,
+          })}
         />
       </Container>
     );

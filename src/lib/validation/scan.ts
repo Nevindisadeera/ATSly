@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-/** Job description length limits — docs/PLANNING.md §7.2 and §22. */
-export const JOB_DESCRIPTION_LIMITS = { minChars: 100, maxChars: 15_000 } as const;
+import { JOB_DESCRIPTION_LIMITS } from "@/lib/config/limits";
 
 const optionalLabel = z
   .string()

@@ -1,25 +1,11 @@
-import { Briefcase, Lightbulb } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 
 import { EmptyState, SectionHeading } from "@/components/data-display";
 
 /**
- * Job match and recommendations render their empty states until job matching (Phase 9b) and
- * AI analysis (Phase 10b) fill them — docs/PLANNING.md §28, Stage 8.
+ * Recommendations render their empty state until AI analysis (Phase 10b) fills them —
+ * docs/PLANNING.md §28, Stage 8.
  */
-export function JobMatchSection() {
-  return (
-    <section id="job-match" aria-labelledby="job-match-title" className="scroll-mt-20">
-      <SectionHeading id="job-match-title" as="h2" size="h3" title="Job match" />
-      <EmptyState
-        className="mt-6"
-        icon={<Briefcase />}
-        title="No job description added"
-        description="Matching against a specific job posting is coming soon. This report covers ATS compatibility, which applies to any role."
-      />
-    </section>
-  );
-}
-
 export function RecommendationsSection() {
   return (
     <section
