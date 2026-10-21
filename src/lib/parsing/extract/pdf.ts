@@ -425,7 +425,7 @@ function isHiddenLink(text: string, url: string): boolean {
 }
 
 /** Share of non-space characters that are replacement or private-use characters. */
-function replacementRatio(lines: Line[]): number {
+export function replacementRatio(lines: Line[]): number {
   let bad = 0;
   let total = 0;
   for (const line of lines) {

@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "fixtures:pdf": "node scripts/fixtures/build-resume-pdfs.mjs",
     "taxonomy:build": "node scripts/taxonomy/build-skills.mjs",
+    "docs:scoring": "vitest run tests/unit/ats/scoring-doc.test.ts --update",
     "db:local": "node scripts/dev/local-mongo.mjs"
   },
   "dependencies": {

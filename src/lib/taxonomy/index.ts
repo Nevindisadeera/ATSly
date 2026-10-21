@@ -3,6 +3,8 @@ import type { EducationLevel, SectionKind, SkillKind } from "@/lib/parsing/types
 import degreesJson from "./degrees.json";
 import headingsJson from "./section-headings.json";
 import skillsJson from "./skills.json";
+import actionVerbsJson from "./action-verbs.json";
+import phrasesJson from "./phrases.json";
 
 /** Static vocabularies used by the parser and, later, the ATS and matching engines. */
 
@@ -413,3 +415,18 @@ export const ENGLISH_STOPWORDS = new Set([
   "designed",
   "worked",
 ]);
+
+/** Strong verbs that open achievement bullets ("Led", "Built", "Reduced"). */
+export const ACTION_VERBS: ReadonlySet<string> = new Set(actionVerbsJson as string[]);
+
+/** Phrases that describe duties rather than results ("responsible for", "worked on"). */
+export const WEAK_PHRASES: readonly string[] = phrasesJson.weakPhrases;
+
+/** Self-descriptions recruiters skim past ("results-driven", "team player"). */
+export const BUZZWORDS: readonly string[] = phrasesJson.buzzwords;
+
+/** Common acronyms and their expansions; ATS searches may use either form. */
+export const ACRONYMS: Readonly<Record<string, string>> = phrasesJson.acronyms;
+
+/** Novelty and symbol fonts that some ATS parsers render as garbage. */
+export const DECORATIVE_FONTS: readonly string[] = phrasesJson.decorativeFonts;

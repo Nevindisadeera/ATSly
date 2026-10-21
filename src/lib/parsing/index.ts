@@ -130,6 +130,11 @@ export function parseResume(
       kind: s.kind,
       heading: s.heading,
       headingIsStandard: s.headingIsStandard,
+      headingEmphasis: s.headingEmphasis,
+      wordCount: lines
+        .slice(s.contentStart, s.contentEnd)
+        .filter((l) => l.region === "body")
+        .reduce((sum, l) => sum + words(l.text).length, 0),
       startLine: s.headingIndex ?? s.contentStart,
       endLine: s.contentEnd,
       confidence: s.confidence,

@@ -14,6 +14,8 @@ export type SectionSpan = {
   kind: SectionKind;
   heading?: string;
   headingIsStandard: boolean;
+  /** The heading stands out visually (style, size, bold or capitals). */
+  headingEmphasis: boolean;
   /** Index of the heading line, or null for the contact block. */
   headingIndex: number | null;
   /** Content lines: [contentStart, contentEnd). */
@@ -71,6 +73,8 @@ type Candidate = {
   kind: SectionKind | null;
   exact: boolean;
   score: number;
+  /** Visual weight alone: heading style, size, bold, capitals. */
+  visual: number;
 };
 
 export function scoreHeading(
@@ -100,6 +104,7 @@ export function scoreHeading(
       kind: match.kind,
       exact: match.exact,
       score: (match.exact ? 3 : 2) + visual,
+      visual,
     };
   }
   // The first line is almost always the person's name, which looks like a heading.
@@ -107,7 +112,7 @@ export function scoreHeading(
   // Unrecognized headings need visual weight; detectSections also accepts weaker ones
   // that share the exact style of recognized headings.
   return visual >= 1 && count <= 4
-    ? { index: -1, kind: null, exact: false, score: visual }
+    ? { index: -1, kind: null, exact: false, score: visual, visual }
     : null;
 }
 
@@ -167,6 +172,7 @@ export function detectSections(lines: Line[]): SectionSpan[] {
     spans.push({
       kind: "contact",
       headingIsStandard: true,
+      headingEmphasis: false,
       headingIndex: null,
       contentStart: 0,
       contentEnd: firstHeading,
@@ -183,6 +189,7 @@ export function detectSections(lines: Line[]): SectionSpan[] {
       kind,
       heading: displayText(lines[heading.index]!.text).replace(/:\s*$/, ""),
       headingIsStandard: heading.kind !== null && heading.exact,
+      headingEmphasis: heading.visual > 0,
       headingIndex: heading.index,
       contentStart,
       contentEnd,
