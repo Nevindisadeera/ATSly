@@ -1,9 +1,11 @@
 import "server-only";
 
 import { runAtsEngine, type AtsReport } from "@/lib/ats";
+import { jobDescriptionRepository } from "@/lib/db/repositories/job-description-repository";
 import { resumeRepository } from "@/lib/db/repositories/resume-repository";
 import { scanRepository } from "@/lib/db/repositories/scan-repository";
 import { logger } from "@/lib/logging/logger";
+import { matchHeadline, runMatchEngine, type MatchReport } from "@/lib/matching";
 import type { ScanError, ScanErrorCode, ScanSummary } from "@/types/api";
 
 /** User-facing failure details — docs/PLANNING.md §24. Both can be retried with a new scan. */
@@ -20,8 +22,11 @@ export const SCAN_FAILURES: Record<ScanErrorCode, ScanError> = {
   },
 };
 
-/** The denormalized summary of a finished ATS report, for lists and the results hero. */
-export function summarizeAts(ats: AtsReport): ScanSummary {
+/**
+ * The denormalized summary of a finished scan, for lists and the results hero. With a job
+ * match, the headline gains the match sentence — §18.6.
+ */
+export function summarizeAts(ats: AtsReport, match?: MatchReport | null): ScanSummary {
   const issueCounts = { critical: 0, major: 0, minor: 0 };
   for (const issue of ats.issues) {
     if (issue.severity === "critical") issueCounts.critical += 1;
@@ -33,17 +38,19 @@ export function summarizeAts(ats: AtsReport): ScanSummary {
     .slice(0, 3)
     .map(String);
   return {
-    headline: ats.headline,
+    headline: match ? `${ats.headline} ${matchHeadline(match.band)}` : ats.headline,
     atsScore: ats.score,
     atsBand: ats.band,
     topActions,
     issueCounts,
+    ...(match ? { matchScore: match.score, matchBand: match.band } : {}),
   };
 }
 
 /**
  * Runs a scan to completion — docs/PLANNING.md §14. Called after the 202 response is sent.
- * Phase 7b runs the ATS stage only; job matching (9a) and AI analysis (10a) slot in later.
+ * Stages: ATS rules, then job matching when a job description was given (9a); AI analysis
+ * slots in with Phase 10a.
  *
  * It never throws: every failure is recorded on the scan, which the status route reports.
  * A scan is claimed once, so a repeated call does nothing, and a scan that timed out in the
@@ -73,17 +80,34 @@ export async function runScanPipeline(
       text: resume.extraction.text,
     });
 
+    let match: MatchReport | undefined;
+    if (scan.jobDescriptionId) {
+      await scanRepository.setStage(scanId, "job_matching");
+      const job = await jobDescriptionRepository.findForOwner(
+        scan.owner,
+        scan.jobDescriptionId,
+      );
+      if (!job) throw new Error("job_description_missing");
+      match = runMatchEngine({ resume: resume.parsed, job: job.extracted });
+    }
+
     await scanRepository.setStage(scanId, "finalizing");
     const durationMs = Date.now() - createdAt.getTime();
     const completed = await scanRepository.complete(scanId, {
       ats,
-      summary: summarizeAts(ats),
+      ...(match ? { match } : {}),
+      summary: summarizeAts(ats, match),
       ai: { status: "skipped" },
       durationMs,
     });
 
     if (completed) {
-      logger.info("scan.complete", { ...log, score: ats.score, durationMs });
+      logger.info("scan.complete", {
+        ...log,
+        score: ats.score,
+        matchScore: match?.score,
+        durationMs,
+      });
     } else {
       logger.warn("scan.finished_after_ending", { ...log, durationMs });
     }

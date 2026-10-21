@@ -90,6 +90,9 @@ export type ScanSummary = {
   topActions: string[];
   /** Failed and warned checks by severity; informational ones count as minor. */
   issueCounts: { critical: number; major: number; minor: number };
+  /** Present when the scan included a job description. */
+  matchScore?: number;
+  matchBand?: import("@/types/report").MatchBand;
 };
 
 /** Response of POST /api/scans (202). */
@@ -113,6 +116,10 @@ export type ScanDetail = ScanStatusResult & {
   resume: { id: string; fileName: string; pageCount: number; wordCount: number };
   summary: ScanSummary | null;
   ats: import("@/lib/ats/types").AtsReport | null;
+  /** The job description this scan was matched against, if any. */
+  job: { id: string; title: string | null; company: string | null } | null;
+  /** Job match report; null without a job description or until the scan is complete. */
+  match: import("@/lib/matching/types").MatchReport | null;
   ai: { status: ScanAiStatus } | null;
   durationMs: number | null;
 };

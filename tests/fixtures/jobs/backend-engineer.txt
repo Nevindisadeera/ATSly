@@ -1,0 +1,30 @@
+Senior Backend Engineer
+
+About us
+Northwind Payments builds payment infrastructure for small online businesses. We process billions of dollars a year with a small, senior team.
+
+What you'll do
+- Design, build and operate high-throughput payment services in Go and Python
+- Own the reliability of services you ship, including on-call rotations
+- Design REST APIs used by thousands of merchants
+- Improve our CI/CD pipelines and developer tooling
+- Mentor engineers and review code across teams
+
+What you'll need
+- 5+ years of professional software engineering experience
+- Strong experience with Go or Python
+- PostgreSQL and Redis in production
+- AWS, Docker and Kubernetes
+- Experience designing and operating microservices
+- Bachelor's degree in Computer Science or equivalent practical experience
+
+Nice to have
+- Kafka or another event streaming platform
+- Terraform
+- GraphQL
+
+Benefits
+- Remote-first, with quarterly team offsites
+- Health, dental and vision insurance
+
+Northwind Payments is an equal opportunity employer. We consider all applicants without regard to race, religion or gender.

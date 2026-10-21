@@ -2,7 +2,7 @@
 
 <!-- Generated from src/lib/ats/checks by `npm run docs:scoring`. Do not edit by hand. -->
 
-Engine version **1.0.0** · 55 checks.
+Engine version **1.1.0** · 55 checks.
 
 ## The model
 

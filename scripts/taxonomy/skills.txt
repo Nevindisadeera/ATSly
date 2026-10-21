@@ -188,3 +188,92 @@ mentoring|Mentoring|Soft skills|soft|coaching
 public-speaking|Public Speaking|Soft skills|soft|presentation skills,presenting
 fortran|Fortran|Programming languages|technology|
 design-systems|Design Systems|Design|skill|design system,component library
+jquery|jQuery|Web|technology|
+prisma|Prisma|Data|tool|prisma orm
+pulumi|Pulumi|DevOps|tool|
+prometheus|Prometheus|DevOps|tool|
+grafana|Grafana|DevOps|tool|
+datadog|Datadog|DevOps|tool|
+cloudformation|AWS CloudFormation|DevOps|tool|cloudformation
+amazon-s3|Amazon S3|Cloud|technology|aws s3,s3
+openapi|OpenAPI|APIs|technology|swagger,openapi specification
+observability|Observability|DevOps|skill|monitoring and observability,application monitoring
+event-driven|Event-Driven Architecture|Architecture|skill|event driven architecture,event-driven systems
+vba|VBA|Programming languages|technology|excel vba
+sas|SAS|Analytics|tool|sas programming
+spss|SPSS|Analytics|tool|ibm spss
+stata|Stata|Analytics|tool|
+data-warehousing|Data Warehousing|Data|skill|data warehouse,data warehouses
+predictive-modeling|Predictive Modeling|Machine learning|skill|predictive modelling,predictive models
+regression-analysis|Regression Analysis|Analytics|skill|regression models,linear regression
+dashboards|Dashboarding|Analytics|skill|dashboards,dashboard development,kpi dashboards
+looker-studio|Looker Studio|Analytics|tool|google data studio,data studio
+mixpanel|Mixpanel|Analytics|tool|
+amplitude|Amplitude|Analytics|tool|
+information-architecture|Information Architecture|Design|skill|
+design-thinking|Design Thinking|Design|skill|
+journey-mapping|Journey Mapping|Design|skill|customer journey mapping,user journey mapping,journey maps
+after-effects|Adobe After Effects|Design|tool|after effects
+premiere-pro|Adobe Premiere Pro|Design|tool|premiere pro
+canva|Canva|Design|tool|
+framer|Framer|Design|tool|
+invision|InVision|Design|tool|
+miro|Miro|Tools|tool|
+typography|Typography|Design|skill|
+meta-ads|Meta Ads|Marketing|tool|facebook ads,instagram ads,meta ads manager
+marketo|Marketo|Marketing|tool|
+semrush|Semrush|Marketing|tool|
+ahrefs|Ahrefs|Marketing|tool|
+google-tag-manager|Google Tag Manager|Marketing|tool|tag manager
+cro|Conversion Rate Optimization|Marketing|skill|cro,conversion optimization
+demand-generation|Demand Generation|Marketing|skill|demand gen
+growth-marketing|Growth Marketing|Marketing|skill|
+product-marketing|Product Marketing|Marketing|skill|
+digital-marketing|Digital Marketing|Marketing|skill|
+marketing-analytics|Marketing Analytics|Marketing|skill|
+campaign-management|Campaign Management|Marketing|skill|campaign planning
+go-to-market|Go-to-Market Strategy|Marketing|skill|go-to-market,go to market strategy,gtm strategy
+public-relations|Public Relations|Marketing|skill|media relations
+wordpress|WordPress|Web|tool|
+account-management|Account Management|Sales|skill|key account management
+pipeline-management|Pipeline Management|Sales|skill|sales pipeline,pipeline management
+cold-calling|Cold Calling|Sales|skill|cold outreach
+pipedrive|Pipedrive|Sales|tool|
+customer-success|Customer Success|Business|skill|
+financial-reporting|Financial Reporting|Finance|skill|management reporting
+fpa|FP&A|Finance|skill|financial planning and analysis,fp&a
+valuation|Valuation|Finance|skill|dcf,discounted cash flow,company valuation
+variance-analysis|Variance Analysis|Finance|skill|budget variance analysis
+auditing|Auditing|Finance|skill|internal audit,external audit,audit procedures
+reconciliation|Account Reconciliation|Finance|skill|account reconciliations,bank reconciliation,reconciliations
+accounts-payable|Accounts Payable|Finance|skill|
+accounts-receivable|Accounts Receivable|Finance|skill|
+tax|Tax Preparation|Finance|skill|tax compliance,tax returns
+netsuite|NetSuite|Business systems|tool|oracle netsuite
+xero|Xero|Finance|tool|
+bloomberg|Bloomberg Terminal|Finance|tool|bloomberg terminal
+workday|Workday|Business systems|tool|workday hcm
+risk-management|Risk Management|Management|skill|risk assessment
+change-management|Change Management|Management|skill|
+resource-planning|Resource Planning|Management|skill|resource allocation,capacity planning
+vendor-management|Vendor Management|Management|skill|supplier management
+process-improvement|Process Improvement|Process|skill|continuous improvement,process optimization
+six-sigma|Six Sigma|Process|skill|lean six sigma
+waterfall|Waterfall|Process|skill|waterfall methodology
+ms-project|Microsoft Project|Tools|tool|ms project
+asana|Asana|Tools|tool|
+trello|Trello|Tools|tool|
+smartsheet|Smartsheet|Tools|tool|
+okrs|OKRs|Product|skill|okr,objectives and key results
+user-stories|User Stories|Product|skill|user story,writing user stories
+requirements-gathering|Requirements Gathering|Product|skill|requirements analysis,business requirements
+business-analysis|Business Analysis|Business|skill|
+powerpoint|Microsoft PowerPoint|Tools|tool|powerpoint,ms powerpoint
+microsoft-office|Microsoft Office|Tools|tool|ms office,office 365,microsoft 365
+google-workspace|Google Workspace|Tools|tool|g suite,gsuite
+performance-management|Performance Management|People|skill|
+employee-relations|Employee Relations|People|skill|
+hris|HRIS|People|tool|human resources information system
+emotional-intelligence|Emotional Intelligence|Soft skills|soft|
+conflict-resolution|Conflict Resolution|Soft skills|soft|
+decision-making|Decision Making|Soft skills|soft|decision-making

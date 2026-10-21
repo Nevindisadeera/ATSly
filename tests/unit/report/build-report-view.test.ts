@@ -32,6 +32,8 @@ function scanOf(d: Draft): ScanDetail {
     },
     summary: summarizeAts(ats),
     ats,
+    job: null,
+    match: null,
     ai: { status: "skipped" },
     durationMs: 120,
   };

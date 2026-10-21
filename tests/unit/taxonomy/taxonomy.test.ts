@@ -1,12 +1,63 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CERTIFICATIONS,
+  findCertificationsInText,
   findSkillsInText,
   lookupSkill,
   matchDegree,
   matchHeading,
   normalizeSkill,
+  SKILLS,
 } from "@/lib/taxonomy";
+
+describe("certifications", () => {
+  const ids = (text: string) => findCertificationsInText(text).map((c) => c.id);
+
+  it("finds certifications by name and alias, in order", () => {
+    expect(ids("PMP certified; also a Certified Public Accountant")).toEqual([
+      "pmp",
+      "cpa",
+    ]);
+    expect(ids("AWS Certified Solutions Architect – Associate")).toEqual([
+      "aws-certification",
+      "aws-solutions-architect",
+    ]);
+    expect(ids("CompTIA Security+ and ITIL Foundation")).toEqual([
+      "comptia-security",
+      "itil",
+    ]);
+  });
+
+  it("matches short codes only in capitals, so ordinary words don't count", () => {
+    expect(ids("The cma office manager reviewed the phr notes")).toEqual([]);
+    expect(ids("CMA and PHR holder")).toEqual(["cma", "phr"]);
+  });
+
+  it("has unique ids", () => {
+    expect(new Set(CERTIFICATIONS.map((c) => c.id)).size).toBe(CERTIFICATIONS.length);
+  });
+});
+
+describe("expanded skills", () => {
+  it("recognizes marketing, finance, design and project skills by alias", () => {
+    expect(lookupSkill("fp&a")?.id).toBe("fpa");
+    expect(lookupSkill("Facebook Ads")?.id).toBe("meta-ads");
+    expect(lookupSkill("Google Data Studio")?.id).toBe("looker-studio");
+    expect(lookupSkill("MS Project")?.id).toBe("ms-project");
+    expect(lookupSkill("objectives and key results")?.id).toBe("okrs");
+    expect(SKILLS.length).toBeGreaterThanOrEqual(270);
+  });
+
+  it("matches product names that are also words only with their own casing", () => {
+    expect(
+      findSkillsInText("Logged hours each workday and avoided a waterfall of tasks"),
+    ).toEqual([]);
+    expect(findSkillsInText("Managed payroll in Workday").map((s) => s.id)).toEqual([
+      "workday",
+    ]);
+  });
+});
 
 describe("matchHeading", () => {
   it("matches standard headings exactly, ignoring case and punctuation", () => {

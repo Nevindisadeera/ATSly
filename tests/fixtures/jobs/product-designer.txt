@@ -1,0 +1,21 @@
+Product Designer (Mid-level)
+
+The role
+Join a small design team shaping a scheduling app used by 40,000 clinics. You'll own features end to end, from research to polished UI.
+
+What you'll be doing
+- Run user research and usability sessions with clinic staff
+- Create wireframes, prototypes and high-fidelity designs in Figma
+- Contribute to and maintain our design system
+- Work closely with engineers to ship accessible, responsive interfaces
+
+What we're looking for
+- 3+ years of product design experience
+- Expert in Figma
+- A portfolio showing UX design and UI design work
+- Experience with design systems and accessibility standards
+- Excellent communication skills
+
+Bonus points
+- HTML and CSS
+- Framer for motion prototypes
