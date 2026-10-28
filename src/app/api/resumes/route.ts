@@ -1,4 +1,4 @@
-import { resolveOwner } from "@/lib/auth/guest";
+import { resolveOwner } from "@/lib/auth/request-owner";
 import { UPLOAD_LIMITS } from "@/lib/config/limits";
 import { readBodyWithLimit } from "@/lib/http/body";
 import { AppError } from "@/lib/http/errors";
@@ -66,7 +66,7 @@ export async function POST(request: Request): Promise<Response> {
     );
     const file = await readFilePart(request, body);
     // The guest identity is issued on the first upload, never just for visiting the site.
-    const { owner, setCookie } = resolveOwner(request, { create: true });
+    const { owner, setCookie } = await resolveOwner(request, { create: true });
     const result = await acceptResumeUpload(file, { requestId, owner });
     return jsonSuccess(result, requestId, {
       status: 201,

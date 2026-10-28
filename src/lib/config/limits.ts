@@ -32,3 +32,16 @@ export const UPLOAD_ACCEPT = [
   UPLOAD_LIMITS.mimeTypes.pdf,
   UPLOAD_LIMITS.mimeTypes.docx,
 ].join(",");
+
+/**
+ * Account limits — docs/PLANNING.md §7.5 and §23. Passwords are capped at 72 bytes, the
+ * most bcrypt reads; longer ones would be silently truncated.
+ */
+export const PASSWORD_LIMITS = { minChars: 8, maxBytes: 72 } as const;
+
+/** Sign-up and sign-in attempts allowed per window — §23. */
+export const AUTH_RATE_LIMITS = {
+  registerPerIpPerHour: 5,
+  loginPerEmailPer15Min: 10,
+  loginPerIpPer15Min: 30,
+} as const;

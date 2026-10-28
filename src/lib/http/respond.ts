@@ -51,7 +51,11 @@ export function jsonError(error: unknown, requestId: string, route: string): Res
   }
 
   const body: ApiErrorBody = {
-    error: { code: appError.code, message: appError.message },
+    error: {
+      code: appError.code,
+      message: appError.message,
+      ...(appError.details !== undefined ? { details: appError.details } : {}),
+    },
   };
   return Response.json(body, {
     status: appError.status,

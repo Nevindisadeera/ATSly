@@ -3,7 +3,9 @@ import type { ApiErrorCode } from "@/types/api";
 const STATUS: Record<ApiErrorCode, number> = {
   INVALID_INPUT: 400,
   UNAUTHENTICATED: 401,
+  FORBIDDEN: 403,
   NOT_FOUND: 404,
+  EMAIL_TAKEN: 409,
   FILE_TOO_LARGE: 413,
   UNSUPPORTED_TYPE: 415,
   EMPTY_DOCUMENT: 422,
@@ -19,7 +21,9 @@ const STATUS: Record<ApiErrorCode, number> = {
 const MESSAGES: Record<ApiErrorCode, string> = {
   INVALID_INPUT: "The request is not valid.",
   UNAUTHENTICATED: "Sign in to continue.",
+  FORBIDDEN: "This request isn't allowed.",
   NOT_FOUND: "Not found.",
+  EMAIL_TAKEN: "An account with this email already exists.",
   FILE_TOO_LARGE: "The file is larger than the upload limit.",
   UNSUPPORTED_TYPE: "Only PDF and DOCX files are supported.",
   EMPTY_DOCUMENT: "The file contains no readable content.",
@@ -40,16 +44,24 @@ export class AppError extends Error {
   readonly status: number;
   /** Extra response headers, e.g. Retry-After for rate limits. */
   readonly headers: Record<string, string>;
+  /** Safe, structured detail for clients, e.g. which form field is invalid. */
+  readonly details?: unknown;
 
   constructor(
     code: ApiErrorCode,
-    options: { message?: string; headers?: Record<string, string>; cause?: unknown } = {},
+    options: {
+      message?: string;
+      headers?: Record<string, string>;
+      details?: unknown;
+      cause?: unknown;
+    } = {},
   ) {
     super(options.message ?? MESSAGES[code], { cause: options.cause });
     this.name = "AppError";
     this.code = code;
     this.status = STATUS[code];
     this.headers = options.headers ?? {};
+    this.details = options.details;
   }
 }
 
