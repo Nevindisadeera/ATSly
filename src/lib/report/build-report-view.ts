@@ -6,8 +6,14 @@ import type { MatchedTerm, MatchReport } from "@/lib/matching/types";
 import type { ParsedResume } from "@/lib/parsing/types";
 import { formatDate, formatDateRange } from "@/lib/utils/format";
 import { SECTION_LABELS } from "@/lib/utils/section-labels";
-import type { ResumeSectionKind, ScanDetail } from "@/types/api";
+import type { ResumeSectionKind, ScanAiStatus, ScanDetail } from "@/types/api";
 
+import {
+  buildRecommendationsView,
+  checkAnchor,
+  quoteLocator,
+  type QuoteLocator,
+} from "./build-recommendations-view";
 import type {
   CheckView,
   IssueGroupView,
@@ -24,10 +30,6 @@ import type {
 /** Keyword hygiene checks summarized in the Keywords & skills section. */
 const HYGIENE_CHECKS = ["K04", "K05", "K06", "K07"];
 const IS_ISSUE = (c: CheckResult) => c.status === "fail" || c.status === "warn";
-
-export function checkAnchor(id: string): string {
-  return `check-${id}`;
-}
 
 function toCheckView(check: CheckResult): CheckView {
   return {
@@ -214,11 +216,19 @@ export function buildParsedView(resume: ParsedResume): ParsedResumeView {
   return { contact, contactFlags, sections, otherSections };
 }
 
-const MATCH_HOW: Record<MatchedTerm["matchType"], string> = {
-  exact: "Exact match",
-  normalized: "Matched as a related term",
-  semantic: "Matched by AI",
-};
+function matchHow(term: MatchedTerm): string {
+  if (term.matchType === "exact") return "Exact match";
+  if (term.matchType === "normalized") return "Matched as a related term";
+  return term.partial ? "Partly matched by AI" : "Matched by AI";
+}
+
+/** Why matching may have missed skills described in other words — §20 degradation. */
+function precisionNote(aiStatus: ScanAiStatus | null): string | null {
+  if (aiStatus === "complete") return null;
+  if (aiStatus === "partial" || aiStatus === "failed")
+    return "Part of the AI review didn't finish, so skills your resume describes in other words may not have been matched.";
+  return "Matched on exact names and known related terms only. Skills your resume describes in other words are recognized by AI review, which didn't run for this scan.";
+}
 
 const FIT_STATUS: Record<MatchView["fit"][number]["status"], string> = {
   meets: "Meets",
@@ -235,7 +245,11 @@ const FIT_LABELS = {
 } as const;
 
 /** The job match section — docs/PLANNING.md §7.3, section 7, and §19.3. */
-export function buildMatchView(match: MatchReport): MatchView {
+export function buildMatchView(
+  match: MatchReport,
+  options: { aiStatus: ScanAiStatus | null; locate: QuoteLocator },
+): MatchView {
+  const { locate } = options;
   const matched = (importance: "required" | "preferred"): MatchedTermView[] =>
     match.matched
       .filter((m) => m.importance === importance && m.kind !== "soft")
@@ -243,9 +257,12 @@ export function buildMatchView(match: MatchReport): MatchView {
         term: m.term,
         kind: m.kind,
         importance: m.importance,
-        how: MATCH_HOW[m.matchType],
+        how: matchHow(m),
+        partial: m.partial === true,
+        byAi: m.matchType === "semantic",
         evidence: m.evidence,
-        location: m.location,
+        // AI evidence is a verified quote without a location; find it in the resume.
+        location: m.location ?? (m.evidence ? locate(m.evidence) : undefined),
       }));
   const missing = (importance: "required" | "preferred") =>
     match.missing
@@ -276,8 +293,12 @@ export function buildMatchView(match: MatchReport): MatchView {
       detail: match.fit[key].detail,
     })),
     honestyFlags: match.honestyFlags,
-    strongMatches: match.strongMatches,
+    strongMatches: match.strongMatches.map((m) => ({
+      ...m,
+      location: locate(m.evidence),
+    })),
     weakMatches: match.weakMatches,
+    precisionNote: precisionNote(options.aiStatus),
   };
 }
 
@@ -295,6 +316,18 @@ export function buildReportView(
   }
   const weightedTotal =
     ats.categories.reduce((sum, c) => sum + c.score * c.weight, 0) / 100;
+  const recommendations = buildRecommendationsView({
+    ai: scan.ai,
+    resume,
+    resumeId: scan.resume.id,
+    hasJob: scan.job !== null,
+  });
+  // Top actions open their recommendation (§7.3); the check itself when there is none.
+  const recommendationFor = new Map(
+    recommendations.items
+      .filter((rec) => rec.checkAnchor)
+      .map((rec) => [rec.checkAnchor, rec.anchor]),
+  );
 
   return {
     scanId: scan.id,
@@ -309,7 +342,10 @@ export function buildReportView(
     bandDescription: BAND_DESCRIPTIONS[ats.band],
     // The summary headline gains the match sentence when there is a job (§18.6).
     headline: scan.summary.headline,
-    topActions: topActions(ats),
+    topActions: topActions(ats).map((action) => ({
+      ...action,
+      anchor: recommendationFor.get(action.anchor) ?? action.anchor,
+    })),
     categories: ats.categories.map((c) => ({
       key: c.key as CategoryKey,
       label: c.label,
@@ -326,7 +362,13 @@ export function buildReportView(
     parsed: resume ? buildParsedView(resume) : null,
     engineVersion: ats.engineVersion,
     job: scan.job ? { title: scan.job.title, company: scan.job.company } : null,
-    match: scan.match ? buildMatchView(scan.match) : null,
+    match: scan.match
+      ? buildMatchView(scan.match, {
+          aiStatus: scan.ai?.status ?? null,
+          locate: quoteLocator(resume),
+        })
+      : null,
     canRescan: resume !== null,
+    recommendations,
   };
 }

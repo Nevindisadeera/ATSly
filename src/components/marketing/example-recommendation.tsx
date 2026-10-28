@@ -1,10 +1,31 @@
 import { SectionHeading } from "@/components/data-display";
 import { Container } from "@/components/layout/container";
+import { RecommendationCard } from "@/components/report/recommendation-card";
+import type { RecommendationView } from "@/lib/report/types";
 
 /**
- * Static example of a recommendation. The interactive RecommendationCard (with copy
- * action) is built with the results page in Phase 10b.
+ * A sample of what the results page recommends. Like real suggestions, the rewrite keeps
+ * the bullet's own facts and leaves a placeholder for the result instead of inventing one.
  */
+const EXAMPLE: RecommendationView = {
+  id: "example",
+  anchor: "example-recommendation",
+  priority: "high",
+  categoryLabel: "Content quality",
+  title: "Lead with what you did and what changed",
+  detail:
+    "This bullet describes a duty, not an achievement. Starting with an action and ending with the result shows recruiters the impact of your work.",
+  before: "Responsible for the React dashboard the sales team used for weekly reporting.",
+  after:
+    "Owned the React dashboard the sales team uses for weekly reporting, cutting report preparation time by [X %].",
+  placeholders: ["[X %]"],
+  location: "Experience › Acme Corp › bullet 1",
+  source: "ai",
+  sourceLabel: "AI suggestion",
+  checkAnchor: null,
+  related: null,
+};
+
 export function ExampleRecommendation() {
   return (
     <section
@@ -20,36 +41,7 @@ export function ExampleRecommendation() {
           description="Instead of “improve your experience section”, you get the exact bullet, why it is weak, and a stronger version that keeps your facts."
         />
 
-        <article className="mt-14 rounded-lg border border-border bg-background p-6 shadow-card sm:p-8">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex h-6 items-center rounded-full border border-border-strong px-2.5 text-xs font-medium text-foreground">
-              High priority
-            </span>
-            <span className="text-xs text-subtle">Experience › Acme Corp › bullet 1</span>
-          </div>
-          <h3 className="mt-5 type-h4">Show what you built and the result</h3>
-          <p className="mt-2 leading-7 text-subtle">
-            This bullet names an activity but not the product, the technologies, or the
-            outcome. Recruiters and ATS keyword searches both reward specifics.
-          </p>
-
-          <dl className="mt-6 grid gap-4">
-            <div className="rounded-md border border-border bg-soft p-4">
-              <dt className="type-caption text-subtle">Current</dt>
-              <dd className="mt-2 text-body">Worked on frontend development.</dd>
-            </div>
-            <div className="rounded-md border border-border-strong p-4">
-              <dt className="type-caption text-subtle">Suggested</dt>
-              <dd className="mt-2 text-foreground">
-                Built a customer reporting dashboard in React and TypeScript, reducing
-                report preparation time by [X%].
-              </dd>
-            </div>
-          </dl>
-          <p className="mt-4 text-sm text-subtle">
-            Replace [X%] with your real result. Suggestions never invent numbers.
-          </p>
-        </article>
+        <RecommendationCard rec={EXAMPLE} className="mt-14 shadow-card" />
       </Container>
     </section>
   );

@@ -17,6 +17,7 @@
     "fixtures:pdf": "node scripts/fixtures/build-resume-pdfs.mjs",
     "taxonomy:build": "node scripts/taxonomy/build-skills.mjs",
     "docs:scoring": "vitest run tests/unit/ats/scoring-doc.test.ts --update",
+    "eval:ai": "vitest run --config vitest.eval.config.mts",
     "db:local": "node scripts/dev/local-mongo.mjs"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "lucide-react": "^1.51.0",
     "mongoose": "^9.11.2",
     "next": "16.3.8",
+    "openai": "^7.28.0",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -53,6 +55,6 @@
     "vitest": "^5.0.3"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.0.0"
   }
 }

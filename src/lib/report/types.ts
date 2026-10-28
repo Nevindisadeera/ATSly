@@ -128,6 +128,56 @@ export type ReportView = {
   match: MatchView | null;
   /** The resume is still stored, so it can be scanned again against another job. */
   canRescan: boolean;
+  recommendations: RecommendationsView;
+};
+
+export type RecommendationPriority = "high" | "medium" | "low";
+
+export type RecommendationView = {
+  id: string;
+  /** Element id of the card, used by "Top 3 actions" links. */
+  anchor: string;
+  priority: RecommendationPriority;
+  /** e.g. "Content", "Job match". */
+  categoryLabel: string;
+  title: string;
+  detail: string;
+  /** The user's own text, quoted (verified to be in the resume). */
+  before: string | null;
+  /** A suggested rewrite of `before`, or new text to add. */
+  after: string | null;
+  /** Placeholders in the rewrite the user must fill in, e.g. "[X %]". */
+  placeholders: string[];
+  /** Where in the resume, e.g. "Experience › Northwind Payments › bullet 2". */
+  location: string | null;
+  source: "rules" | "ai";
+  /** "AI suggestion", "From the checks" or "From the job match". */
+  sourceLabel: string;
+  /** The check a rules recommendation comes from. */
+  checkAnchor: string | null;
+  /** Where the reasoning behind it is shown: its check, or the job match section. */
+  related: { href: string; label: string } | null;
+};
+
+/** How to run the analysis again: a new scan of the same resume, or the scan page. */
+export type RetryView =
+  { kind: "scan"; resumeId: string } | { kind: "link"; href: string; hint: string };
+
+export type RecommendationsNotice = {
+  /** warning: something failed. info: AI didn't run, by design or because of a limit. */
+  tone: "warning" | "info";
+  title: string;
+  body: string;
+  retry: RetryView | null;
+};
+
+export type RecommendationsView = {
+  items: RecommendationView[];
+  counts: Record<RecommendationPriority, number>;
+  /** Explains AI that failed or didn't run; null when everything ran. */
+  notice: RecommendationsNotice | null;
+  /** Shown instead of the list when there is nothing to recommend. */
+  empty: { title: string; description: string; retry: RetryView | null } | null;
 };
 
 export type MatchComponentView = {
@@ -144,8 +194,12 @@ export type MatchedTermView = {
   term: string;
   kind: TermKind;
   importance: Importance;
-  /** "Exact match", "Matched as a related term" or "Matched by AI". */
+  /** "Exact match", "Matched as a related term", "Matched by AI" or "Partly matched by AI". */
   how: string;
+  /** Counted as half: the resume shows related experience rather than a clear match. */
+  partial: boolean;
+  /** The match came from AI review; its evidence was checked against the resume. */
+  byAi: boolean;
   evidence?: string;
   location?: string;
 };
@@ -173,6 +227,9 @@ export type MatchView = {
   missingPreferred: MissingTermView[];
   fit: FitRowView[];
   honestyFlags: string[];
-  strongMatches: { requirement: string; evidence: string }[];
+  /** Responsibilities the resume clearly shows, with the quote that shows it. */
+  strongMatches: { requirement: string; evidence: string; location?: string }[];
   weakMatches: { requirement: string; reason: string }[];
+  /** Why matching may have missed skills worded differently; null when AI review ran. */
+  precisionNote: string | null;
 };

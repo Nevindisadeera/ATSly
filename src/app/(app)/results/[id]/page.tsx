@@ -11,6 +11,7 @@ import { isAppError } from "@/lib/http/errors";
 import type { ParsedResume } from "@/lib/parsing/types";
 import { buildReportView } from "@/lib/report/build-report-view";
 import { progressSteps } from "@/lib/report/progress";
+import { configuredAiProvider } from "@/lib/services/ai-service";
 import { getResumeForOwner } from "@/lib/services/resume-service";
 import { getScanForOwner } from "@/lib/services/scan-service";
 
@@ -74,10 +75,11 @@ export default async function ResultsPage({ params }: PageProps<"/results/[id]">
             updatedAt: scan.updatedAt,
             error: scan.error,
           }}
-          // AI review adds its step with Phase 10a.
+          // AI review shows its step when a provider is configured; a scan over the daily
+          // budget skips it and goes straight to finalizing, which completes every step.
           steps={progressSteps({
             hasJobDescription: scan.job !== null,
-            aiEnabled: false,
+            aiEnabled: !("skipped" in configuredAiProvider()),
           })}
         />
       </Container>

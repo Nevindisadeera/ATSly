@@ -88,7 +88,14 @@ export async function getScanForOwner(owner: Owner, id: string): Promise<ScanDet
         }
       : null,
     match: scan.match,
-    ai: scan.ai,
+    ai: scan.ai
+      ? {
+          status: scan.ai.status,
+          skippedReason: scan.ai.skippedReason ?? null,
+          contentQuality: scan.ai.contentQuality ?? null,
+          recommendations: scan.ai.recommendations ?? [],
+        }
+      : null,
     durationMs: scan.durationMs,
   };
 }

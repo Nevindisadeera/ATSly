@@ -4,7 +4,7 @@ import type { AtsReport } from "@/lib/ats";
 import type { Owner } from "@/lib/auth/owner";
 import type { MatchReport } from "@/lib/matching";
 import type {
-  ScanAiStatus,
+  ScanAiRecord,
   ScanError,
   ScanStage,
   ScanStatus,
@@ -30,7 +30,9 @@ export type StoredScan = {
   engineVersion: string;
   ats: AtsReport | null;
   match: MatchReport | null;
-  ai: { status: ScanAiStatus } | null;
+  ai: ScanAiRecord | null;
+  model: string | null;
+  promptVersion: string | null;
   summary: ScanSummary | null;
   resumeSnapshot: { fileName: string; pageCount: number; wordCount: number };
   durationMs: number | null;
@@ -46,7 +48,10 @@ export type ScanResult = {
   ats: AtsReport;
   match?: MatchReport;
   summary: ScanSummary;
-  ai: { status: ScanAiStatus };
+  ai: ScanAiRecord;
+  /** The AI model and prompt version used, for reproducibility (§16.4). */
+  model?: string | null;
+  promptVersion?: string | null;
   durationMs: number;
 };
 
@@ -77,7 +82,9 @@ function toStored(doc: ScanDocument): StoredScan {
     engineVersion: doc.engineVersion,
     ats: (doc.ats as AtsReport | undefined) ?? null,
     match: (doc.match as MatchReport | undefined) ?? null,
-    ai: doc.ai ? { status: doc.ai.status } : null,
+    ai: doc.ai ? { ...doc.ai } : null,
+    model: doc.model ?? null,
+    promptVersion: doc.promptVersion ?? null,
     summary: doc.summary ?? null,
     resumeSnapshot: { ...doc.resumeSnapshot },
     durationMs: doc.durationMs ?? null,

@@ -1,7 +1,12 @@
 import { Info } from "lucide-react";
 import { cn } from "cn";
 
-import { KeywordChip, ScoreBar, SectionHeading } from "@/components/data-display";
+import {
+  EvidenceBlock,
+  KeywordChip,
+  ScoreBar,
+  SectionHeading,
+} from "@/components/data-display";
 import { KeywordChipWithDetails } from "@/components/data-display/keyword-chip-details";
 import type {
   FitRowView,
@@ -67,10 +72,19 @@ function MatchedChips({ terms }: { terms: MatchedTermView[] }) {
           <KeywordChipWithDetails
             term={t.term}
             state="matched"
+            note={t.partial ? "partly" : undefined}
             detailsLabel={`${t.term}: how it matched`}
             details={
               <div className="grid gap-2">
                 <p className="font-medium text-foreground">{t.how}</p>
+                {t.byAi ? (
+                  <p className="text-xs leading-5 text-subtle">
+                    {t.partial
+                      ? "Counted as half: your resume shows related experience rather than a clear match."
+                      : "Your resume shows this in other words."}{" "}
+                    The quote was checked against your resume.
+                  </p>
+                ) : null}
                 {t.evidence ? (
                   <blockquote className="rounded-sm bg-soft px-3 py-2 leading-6 text-body">
                     <span aria-hidden="true">“</span>
@@ -187,6 +201,12 @@ export function JobMatchSection({ view }: { view: ReportView }) {
                 No specific skills or tools were found in this job description.
               </p>
             ) : null}
+            {match.precisionNote ? (
+              <p className="flex gap-2 border-t border-border pt-4 text-xs leading-5 text-subtle">
+                <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+                {match.precisionNote}
+              </p>
+            ) : null}
           </div>
 
           <div className="rounded-lg border border-border bg-background p-6">
@@ -216,38 +236,44 @@ export function JobMatchSection({ view }: { view: ReportView }) {
             </dl>
           </div>
 
-          {match.strongMatches.length > 0 || match.weakMatches.length > 0 ? (
-            <div className="grid gap-6 rounded-lg border border-border bg-background p-6 md:grid-cols-2">
-              {match.strongMatches.length > 0 ? (
-                <div>
-                  <h3 className="type-h4">Strong matches</h3>
-                  <ul className="mt-3 grid gap-3 text-sm leading-6">
-                    {match.strongMatches.map((m) => (
-                      <li key={m.requirement}>
-                        <span className="font-medium text-foreground">
-                          {m.requirement}
-                        </span>
-                        <span className="block text-subtle">“{m.evidence}”</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {match.weakMatches.length > 0 ? (
-                <div>
-                  <h3 className="type-h4">Weak matches</h3>
-                  <ul className="mt-3 grid gap-3 text-sm leading-6">
-                    {match.weakMatches.map((m) => (
-                      <li key={m.requirement}>
-                        <span className="font-medium text-foreground">
-                          {m.requirement}
-                        </span>
-                        <span className="block text-subtle">{m.reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+          {match.strongMatches.length > 0 ? (
+            <div className="rounded-lg border border-border bg-background p-6">
+              <h3 className="type-h4">Strong matches</h3>
+              <p className="mt-1 text-sm leading-6 text-subtle">
+                Responsibilities in the posting that your experience clearly shows. From
+                AI review; every quote is checked against your resume.
+              </p>
+              <ul className="mt-5 grid gap-5">
+                {match.strongMatches.map((m) => (
+                  <li key={m.requirement} className="grid gap-2">
+                    <span className="text-sm leading-6 font-medium text-foreground">
+                      {m.requirement}
+                    </span>
+                    <EvidenceBlock text={m.evidence} location={m.location} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {match.weakMatches.length > 0 ? (
+            <div className="rounded-lg border border-border bg-background p-6">
+              <h3 className="type-h4">Weak matches</h3>
+              <p className="mt-1 text-sm leading-6 text-subtle">
+                Responsibilities your resume shows less clearly. If you have done this
+                work, describe it in your own words.
+              </p>
+              <ul className="mt-5 divide-y divide-border">
+                {match.weakMatches.map((m) => (
+                  <li
+                    key={m.requirement}
+                    className="grid gap-1 py-4 text-sm leading-6 first:pt-0 last:pb-0"
+                  >
+                    <span className="font-medium text-foreground">{m.requirement}</span>
+                    <span className="text-subtle">{m.reason}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : null}
 

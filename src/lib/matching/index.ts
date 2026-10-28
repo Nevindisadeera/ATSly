@@ -7,6 +7,7 @@ export {
   matchHeadline,
   missingSuggestion,
   runMatchEngine,
+  semanticCredit,
   type MatchInput,
 } from "./engine";
 export { extractJobRequirements } from "./extract";

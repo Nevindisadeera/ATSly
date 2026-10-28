@@ -11,6 +11,8 @@ export type KeywordChipProps = {
    */
   state: KeywordChipState;
   importance?: "required" | "preferred";
+  /** A short muted qualifier after the term, e.g. "partly". */
+  note?: string;
   className?: string;
 };
 
@@ -41,7 +43,8 @@ export function KeywordChipContent({
   term,
   state,
   importance,
-}: Pick<KeywordChipProps, "term" | "state" | "importance">) {
+  note,
+}: Pick<KeywordChipProps, "term" | "state" | "importance" | "note">) {
   return (
     <>
       {state === "matched" || state === "backed" ? (
@@ -58,6 +61,9 @@ export function KeywordChipContent({
         />
       ) : null}
       <span>{term}</span>
+      {note ? (
+        <span className="text-xs font-normal text-muted-foreground">{note}</span>
+      ) : null}
       {importance === "preferred" ? (
         <span className="text-xs font-normal text-muted-foreground">preferred</span>
       ) : null}
@@ -70,10 +76,16 @@ export function KeywordChipContent({
 }
 
 /** Static keyword chip. For a chip with a detail tooltip, use KeywordChipWithTooltip. */
-export function KeywordChip({ term, state, importance, className }: KeywordChipProps) {
+export function KeywordChip({
+  term,
+  state,
+  importance,
+  note,
+  className,
+}: KeywordChipProps) {
   return (
     <span className={keywordChipClasses(state, className)}>
-      <KeywordChipContent term={term} state={state} importance={importance} />
+      <KeywordChipContent term={term} state={state} importance={importance} note={note} />
     </span>
   );
 }
