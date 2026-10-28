@@ -320,7 +320,7 @@ export function buildReportView(
     ai: scan.ai,
     resume,
     resumeId: scan.resume.id,
-    hasJob: scan.job !== null,
+    jobDescriptionId: scan.job?.id ?? null,
   });
   // Top actions open their recommendation (§7.3); the check itself when there is none.
   const recommendationFor = new Map(

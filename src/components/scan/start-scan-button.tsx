@@ -16,6 +16,8 @@ type StartScanButtonProps = {
   resumeId: string | null;
   /** Sent with the scan when present (job matching). */
   jobDescription?: JobDescriptionPayload;
+  /** Or the id of a job description already saved, to scan against it again. */
+  jobDescriptionId?: string;
   /** Disables the button for reasons the caller explains, e.g. a too-long job description. */
   disabled?: boolean;
   label: string;
@@ -33,6 +35,7 @@ type StartScanButtonProps = {
 export function StartScanButton({
   resumeId,
   jobDescription,
+  jobDescriptionId,
   disabled = false,
   label,
   pendingLabel = "Starting analysis…",
@@ -49,7 +52,7 @@ export function StartScanButton({
     if (!resumeId || disabled || pending) return;
     setPending(true);
     setFailure(null);
-    const outcome = await startScan(resumeId, { jobDescription });
+    const outcome = await startScan(resumeId, { jobDescription, jobDescriptionId });
     if (outcome.ok) {
       // Stay in the pending state until the results page replaces this one.
       router.push(`/results/${outcome.data.scanId}`);

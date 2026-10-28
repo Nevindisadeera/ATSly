@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { CircleAlert, Info, Lightbulb } from "lucide-react";
 import { cn } from "cn";
 
 import { EmptyState, SectionHeading } from "@/components/data-display";
 import { StartScanButton } from "@/components/scan/start-scan-button";
-import { Button } from "@/components/ui/button";
 import type {
   RecommendationPriority,
   RecommendationsNotice,
@@ -30,20 +28,15 @@ const FILTERS: { key: Filter; label: string }[] = [
 export const RECOMMENDATIONS_DISCLAIMER =
   "Suggestions are generated from your own content. Verify accuracy before using them.";
 
-/** Runs the analysis again: a new scan of the same resume, or the scan page for a job. */
+/** Runs the analysis again: a new scan of the same resume, against the same job. */
 function Retry({ retry }: { retry: RetryView }) {
-  if (retry.kind === "scan") {
-    return (
-      <StartScanButton resumeId={retry.resumeId} label="Try again" variant="secondary" />
-    );
-  }
   return (
-    <div className="grid gap-2">
-      <Button asChild variant="secondary" className="w-full sm:w-fit">
-        <Link href={retry.href}>Try again</Link>
-      </Button>
-      <p className="text-xs leading-5 text-subtle">{retry.hint}</p>
-    </div>
+    <StartScanButton
+      resumeId={retry.resumeId}
+      jobDescriptionId={retry.jobDescriptionId ?? undefined}
+      label="Try again"
+      variant="secondary"
+    />
   );
 }
 

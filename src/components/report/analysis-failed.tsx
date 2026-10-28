@@ -9,11 +9,21 @@ import type { ScanErrorCode } from "@/types/api";
 type AnalysisFailedProps = {
   code: ScanErrorCode;
   resumeId: string;
+  /** The job the scan was matched against, so retrying keeps it. */
+  jobDescriptionId?: string;
   fileName: string;
 };
 
-/** A scan that failed or timed out — docs/PLANNING.md §24. Retry starts a new scan. */
-export function AnalysisFailed({ code, resumeId, fileName }: AnalysisFailedProps) {
+/**
+ * A scan that failed or timed out — docs/PLANNING.md §24. Retry starts a new scan of the
+ * same resume, against the same job.
+ */
+export function AnalysisFailed({
+  code,
+  resumeId,
+  jobDescriptionId,
+  fileName,
+}: AnalysisFailedProps) {
   const copy = FAILURE_COPY[code];
   return (
     <section
@@ -34,7 +44,11 @@ export function AnalysisFailed({ code, resumeId, fileName }: AnalysisFailedProps
       </h1>
       <p className="mt-3 text-sm leading-6 text-body">{copy.body}</p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-start">
-        <StartScanButton resumeId={resumeId} label="Try again" />
+        <StartScanButton
+          resumeId={resumeId}
+          jobDescriptionId={jobDescriptionId}
+          label="Try again"
+        />
         <Button asChild variant="outline" className="w-full sm:w-fit">
           <a href={`${site.repositoryUrl}/issues/new`} target="_blank" rel="noreferrer">
             Report a problem
