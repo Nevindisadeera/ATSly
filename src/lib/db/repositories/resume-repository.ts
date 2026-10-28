@@ -128,6 +128,12 @@ export const resumeRepository = {
       return result.deletedCount === 1;
     });
   },
+  deleteAllForOwner(owner: Owner): Promise<number> {
+    return withDb(
+      async () => (await ResumeModel.deleteMany(ownerFilter(owner))).deletedCount,
+    );
+  },
+
   /**
    * Moves all of one owner's resumes to another (a guest signing in) and drops the
    * guest deletion date. Returns how many moved; running it again moves nothing.

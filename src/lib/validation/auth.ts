@@ -40,3 +40,8 @@ export const credentialsSchema = z.object({
 
 /** Largest accepted register request body. */
 export const MAX_REGISTER_BODY_BYTES = 4 * 1024;
+
+/** Body of DELETE /api/account and DELETE /api/scans: the typed confirmation (§7.6). */
+export const confirmDeleteSchema = z.strictObject({
+  confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }),
+});

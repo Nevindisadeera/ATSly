@@ -55,6 +55,23 @@ export type ScanResult = {
   durationMs: number;
 };
 
+/** A scan as lists show it: the denormalized summary, never the report (§16.4). */
+export type ScanListRow = Pick<
+  StoredScan,
+  | "id"
+  | "createdAt"
+  | "status"
+  | "error"
+  | "resumeId"
+  | "jobDescriptionId"
+  | "jobSnapshot"
+  | "summary"
+  | "resumeSnapshot"
+>;
+
+/** Lists skip the embedded report, the bulk of every document. */
+const LIST_PROJECTION = { ats: 0, match: 0, ai: 0 } as const;
+
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
 const IN_PROGRESS: ScanStatus[] = ["queued", "running"];
 
@@ -210,6 +227,98 @@ export const scanRepository = {
       return result.deletedCount;
     });
   },
+  /**
+   * One page of the owner's scans, newest first. `before` continues after the last row of
+   * the previous page: same timestamps are ordered by id, so no row is skipped or repeated.
+   */
+  listForOwner(
+    owner: Owner,
+    options: {
+      limit: number;
+      before?: { createdAt: Date; id: string };
+      status?: ScanStatus;
+    },
+  ): Promise<ScanListRow[]> {
+    return withDb(async () => {
+      const { before } = options;
+      const docs = await ScanModel.find(
+        {
+          ...ownerFilter(owner),
+          ...(options.status ? { status: options.status } : {}),
+          ...(before
+            ? {
+                $or: [
+                  { createdAt: { $lt: before.createdAt } },
+                  { createdAt: before.createdAt, _id: { $lt: before.id } },
+                ],
+              }
+            : {}),
+        },
+        LIST_PROJECTION,
+      )
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(options.limit)
+        .lean<ScanDocument[]>();
+      return docs.map((doc) => {
+        const scan = toStored(doc);
+        return {
+          id: scan.id,
+          createdAt: scan.createdAt,
+          status: scan.status,
+          error: scan.error,
+          resumeId: scan.resumeId,
+          jobDescriptionId: scan.jobDescriptionId,
+          jobSnapshot: scan.jobSnapshot,
+          summary: scan.summary,
+          resumeSnapshot: scan.resumeSnapshot,
+        };
+      });
+    });
+  },
+
+  /** Scores of the owner's complete scans, newest first, for dashboard stats. */
+  scoresForOwner(
+    owner: Owner,
+    limit = 500,
+  ): Promise<{ createdAt: Date; atsScore: number; matchScore: number | null }[]> {
+    return withDb(async () => {
+      const docs = await ScanModel.find(
+        { ...ownerFilter(owner), status: "complete" },
+        { createdAt: 1, "summary.atsScore": 1, "summary.matchScore": 1 },
+      )
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(limit)
+        .lean<Pick<ScanDocument, "createdAt" | "summary">[]>();
+      return docs
+        .filter((doc) => typeof doc.summary?.atsScore === "number")
+        .map((doc) => ({
+          createdAt: doc.createdAt,
+          atsScore: doc.summary!.atsScore,
+          matchScore: doc.summary!.matchScore ?? null,
+        }));
+    });
+  },
+
+  countForOwner(owner: Owner, status?: ScanStatus): Promise<number> {
+    return withDb(() =>
+      ScanModel.countDocuments({ ...ownerFilter(owner), ...(status ? { status } : {}) }),
+    );
+  },
+
+  deleteForOwner(owner: Owner, id: string): Promise<boolean> {
+    if (!OBJECT_ID.test(id)) return Promise.resolve(false);
+    return withDb(async () => {
+      const result = await ScanModel.deleteOne({ _id: id, ...ownerFilter(owner) });
+      return result.deletedCount === 1;
+    });
+  },
+
+  deleteAllForOwner(owner: Owner): Promise<number> {
+    return withDb(
+      async () => (await ScanModel.deleteMany(ownerFilter(owner))).deletedCount,
+    );
+  },
+
   /**
    * Moves all of one owner's scans to another (a guest signing in) and drops the
    * guest deletion date. Returns how many moved; running it again moves nothing.

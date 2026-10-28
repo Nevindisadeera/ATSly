@@ -108,6 +108,13 @@ export const userRepository = {
     });
   },
 
+  deleteById(id: string): Promise<boolean> {
+    if (!OBJECT_ID.test(id)) return Promise.resolve(false);
+    return withDb(
+      async () => (await UserModel.deleteOne({ _id: id })).deletedCount === 1,
+    );
+  },
+
   touchLogin(id: string): Promise<void> {
     return withDb(async () => {
       await UserModel.updateOne({ _id: id }, { $set: { lastLoginAt: new Date() } });
