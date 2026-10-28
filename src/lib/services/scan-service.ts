@@ -2,6 +2,7 @@ import "server-only";
 
 import { ENGINE_VERSION } from "@/lib/ats";
 import type { Owner } from "@/lib/auth/owner";
+import { jobDescriptionRepository } from "@/lib/db/repositories/job-description-repository";
 import { resumeRepository } from "@/lib/db/repositories/resume-repository";
 import { scanRepository, type StoredScan } from "@/lib/db/repositories/scan-repository";
 import { AppError } from "@/lib/http/errors";
@@ -36,7 +37,9 @@ export async function createScan(
 
   const job = input.jobDescription
     ? await acceptJobDescription(input.jobDescription, context)
-    : null;
+    : input.jobDescriptionId
+      ? await savedJobDescription(owner, input.jobDescriptionId, expiresAt)
+      : null;
 
   const scan = await scanRepository.create({
     owner,
@@ -60,6 +63,14 @@ export async function createScan(
     ownerType: owner.type,
   });
   return { scanId: scan.id };
+}
+
+/** A job description the owner pasted before; a guest's is kept as long as the new scan. */
+async function savedJobDescription(owner: Owner, id: string, expiresAt: Date | null) {
+  const job = await jobDescriptionRepository.findForOwner(owner, id);
+  if (!job) throw new AppError("NOT_FOUND");
+  if (expiresAt) await jobDescriptionRepository.extendExpiry(owner, id, expiresAt);
+  return job;
 }
 
 export async function getScanStatusForOwner(

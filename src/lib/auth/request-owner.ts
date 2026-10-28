@@ -2,6 +2,8 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 
+import { userRepository } from "@/lib/db/repositories/user-repository";
+
 import { decodeGuestCookie, GUEST_COOKIE, guestCookieHeader, readCookie } from "./guest";
 import type { Owner } from "./owner";
 import { sessionUserId } from "./session";
@@ -30,7 +32,10 @@ export async function resolveOwner(
   options: { create?: boolean } = {},
 ): Promise<ResolvedOwner | null> {
   const userId = await sessionUserId(request.headers);
-  if (userId) return { owner: { type: "user", id: userId } };
+  // A session outlives a deleted account until it expires; it must not create new data.
+  if (userId && (!options.create || (await userRepository.findById(userId)))) {
+    return { owner: { type: "user", id: userId } };
+  }
 
   const existing = decodeGuestCookie(readCookie(request.headers, GUEST_COOKIE));
   if (existing) return { owner: { type: "guest", id: existing } };

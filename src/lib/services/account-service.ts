@@ -15,6 +15,7 @@ import { AppError } from "@/lib/http/errors";
 import { logger } from "@/lib/logging/logger";
 import { createMongoRateLimiter } from "@/lib/security/rate-limit-mongo";
 import type { RegisterInput } from "@/lib/validation/auth";
+import type { AccountDetails, DeletedData } from "@/types/api";
 
 /**
  * Accounts — docs/PLANNING.md §7.5, §16.1 and §23: sign-up, password sign-in with rate
@@ -155,4 +156,51 @@ export async function claimGuestData(
     });
   }
   return { resumes, scans, jobDescriptions };
+}
+
+export async function getAccount(userId: string): Promise<AccountDetails> {
+  const user = await userRepository.findById(userId);
+  if (!user) throw new AppError("UNAUTHENTICATED");
+  return {
+    name: user.name,
+    email: user.email,
+    signInMethods: [
+      ...(user.passwordHash ? (["password"] as const) : []),
+      ...(user.providers.some((p) => p.provider === "google")
+        ? (["google"] as const)
+        : []),
+    ],
+    createdAt: user.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Deletes every report and what it was made from (§7.6 "Delete all scans"): scans first,
+ * then job descriptions and resumes, so nothing is left pointing at missing data.
+ */
+export async function deleteAllData(
+  owner: Owner,
+  context: { requestId?: string } = {},
+): Promise<DeletedData> {
+  const scans = await scanRepository.deleteAllForOwner(owner);
+  const jobDescriptions = await jobDescriptionRepository.deleteAllForOwner(owner);
+  const resumes = await resumeRepository.deleteAllForOwner(owner);
+  logger.info("account.data_deleted", {
+    requestId: context.requestId,
+    ownerType: owner.type,
+    scans,
+    jobDescriptions,
+    resumes,
+  });
+  return { scans, resumes, jobDescriptions };
+}
+
+/** Deletes the account and all of its data, in the order of §16.7; logs counts only. */
+export async function deleteAccount(
+  userId: string,
+  context: { requestId?: string } = {},
+): Promise<void> {
+  const deleted = await deleteAllData({ type: "user", id: userId }, context);
+  if (!(await userRepository.deleteById(userId))) throw new AppError("UNAUTHENTICATED");
+  logger.info("account.deleted", { requestId: context.requestId, ...deleted });
 }

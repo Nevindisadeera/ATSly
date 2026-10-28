@@ -149,3 +149,50 @@ export type ScanDetail = ScanStatusResult & {
   ai: ScanAiDetail | null;
   durationMs: number | null;
 };
+
+/** A scan in a list (dashboard, GET /api/scans): the summary, never the report. */
+export type ScanListItem = {
+  id: string;
+  status: ScanStatus;
+  createdAt: string;
+  resume: { id: string; fileName: string };
+  job: { id: string; title: string | null; company: string | null } | null;
+  /** Null until the scan is complete. */
+  atsScore: number | null;
+  atsBand: import("@/types/report").AtsBand | null;
+  matchScore: number | null;
+  matchBand: import("@/types/report").MatchBand | null;
+  /** The most valuable fix, from the summary. */
+  topAction: string | null;
+  error: ScanErrorCode | null;
+};
+
+/** Response of GET /api/scans. Pass nextCursor back as `cursor` for the next page. */
+export type ScanListPage = { items: ScanListItem[]; nextCursor: string | null };
+
+/** Everything the dashboard shows, read in one go (§7.4). */
+export type DashboardOverview = {
+  /** The newest complete scan. */
+  latest: ScanListItem | null;
+  stats: {
+    /** Complete scans. */
+    scans: number;
+    bestAtsScore: number | null;
+    /** Average job match over scans that had a job description. */
+    averageMatch: number | null;
+    /** ATS scores of the latest complete scans, oldest first. */
+    trend: { date: string; atsScore: number }[];
+  };
+  recent: ScanListPage;
+};
+
+/** The account as settings shows it (§7.6). */
+export type AccountDetails = {
+  name: string;
+  email: string;
+  signInMethods: ("password" | "google")[];
+  createdAt: string;
+};
+
+/** Response of DELETE /api/scans: what was removed. */
+export type DeletedData = { scans: number; resumes: number; jobDescriptions: number };

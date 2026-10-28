@@ -117,6 +117,12 @@ export const jobDescriptionRepository = {
       );
     });
   },
+  deleteAllForOwner(owner: Owner): Promise<number> {
+    return withDb(
+      async () => (await JobDescriptionModel.deleteMany(ownerFilter(owner))).deletedCount,
+    );
+  },
+
   /**
    * Moves all of one owner's job descriptions to another (a guest signing in) and drops the
    * guest deletion date. Returns how many moved; running it again moves nothing.

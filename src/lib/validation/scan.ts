@@ -25,12 +25,24 @@ export const jobDescriptionSchema = z.strictObject({
 });
 
 /** Body of POST /api/scans — docs/PLANNING.md §22. */
-export const createScanSchema = z.strictObject({
-  resumeId: z
-    .string({ error: "resumeId is required." })
-    .regex(/^[0-9a-f]{24}$/i, "resumeId must be the id of an uploaded resume."),
-  jobDescription: jobDescriptionSchema.optional(),
-});
+export const createScanSchema = z
+  .strictObject({
+    resumeId: z
+      .string({ error: "resumeId is required." })
+      .regex(/^[0-9a-f]{24}$/i, "resumeId must be the id of an uploaded resume."),
+    jobDescription: jobDescriptionSchema.optional(),
+    /** Scans again against a job description this owner already pasted. */
+    jobDescriptionId: z
+      .string()
+      .regex(
+        /^[0-9a-f]{24}$/i,
+        "jobDescriptionId must be the id of a saved job description.",
+      )
+      .optional(),
+  })
+  .refine((input) => !(input.jobDescription && input.jobDescriptionId), {
+    message: "Send a job description or the id of a saved one, not both.",
+  });
 
 export type CreateScanInput = z.infer<typeof createScanSchema>;
 
