@@ -77,15 +77,22 @@ export function compactResume(resume: ParsedResume): CompactResume {
 
 /**
  * The job description with the requirements first, trimmed from the end once the
- * requirements are kept. Boilerplate and benefits are dropped by segmentation.
+ * requirements are kept. Boilerplate and benefits are dropped by segmentation. Text before
+ * the first heading (usually the job title) stays on top: moved after another section, it
+ * would read as that section's last lines.
  */
 export function jobDescriptionInput(rawText: string): string {
   const segments = segmentJobText(normalizeJobText(rawText)).filter(
     (s) => s.kind !== "benefits",
   );
+  const opening = segments[0] && !segments[0].heading ? segments.slice(0, 1) : [];
   const order = ["requirements", "preferred", "responsibilities", "other", "about"];
-  const text = [...segments]
-    .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind))
+  const text = [
+    ...opening,
+    ...segments
+      .slice(opening.length)
+      .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind)),
+  ]
     .map((s) => [s.heading, ...s.lines].filter(Boolean).join("\n"))
     .join("\n\n");
   return text.length > MAX_JOB_CHARS ? text.slice(0, MAX_JOB_CHARS) : text;
