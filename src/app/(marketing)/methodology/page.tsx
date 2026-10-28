@@ -11,6 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PROMPT_VERSION } from "@/lib/ai/prompts";
+import { ENGINE_VERSION } from "@/lib/ats/weights";
+import { MATCH_ENGINE_VERSION } from "@/lib/matching/engine";
+import { PARSER_VERSION } from "@/lib/parsing/types";
 import type { AtsBand, MatchBand } from "@/types/report";
 
 export const metadata: Metadata = {
@@ -178,7 +182,9 @@ export default function MethodologyPage() {
         with your resume in three steps: exact terms, recognized equivalents (for example
         “JS” and “JavaScript”), and requirements your experience demonstrates in different
         words. A requirement only counts as met when we can quote the part of your resume
-        that shows it.
+        that shows it. A requirement recognized by AI counts fully only when the evidence
+        is clear, and half when your resume shows related experience. Certifications only
+        count when they&apos;re named.
       </p>
       <ul>
         <li>Required skills and tools: 40%</li>
@@ -220,6 +226,14 @@ export default function MethodologyPage() {
           placeholder such as [X%] instead of inventing one.
         </li>
         <li>We never recommend adding skills or experience you don&apos;t have.</li>
+        <li>
+          If AI is switched off, busy or unavailable, your report still completes with the
+          rule-based scores, and says which parts are missing.
+        </li>
+        <li>
+          Your name, email and phone number are removed before your resume is sent for AI
+          review, and the AI provider is asked not to store it.
+        </li>
       </ul>
 
       <h2 id="limits">Limitations</h2>
@@ -241,6 +255,12 @@ export default function MethodologyPage() {
         Every report records the version of the scoring rules used. When the rules change,
         older reports keep their original scores, so you can compare like with like.
       </p>
+      <ul>
+        <li>ATS scoring rules: version {ENGINE_VERSION}</li>
+        <li>Job matching: version {MATCH_ENGINE_VERSION}</li>
+        <li>Resume parser: version {PARSER_VERSION}</li>
+        <li>AI prompts: version {PROMPT_VERSION}</li>
+      </ul>
 
       <p className="!mt-14 border-t border-border pt-8">
         Ready to try it? <Link href="/scan">Scan your resume</Link>.
