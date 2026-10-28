@@ -5,8 +5,15 @@ import { Button } from "@/components/ui/button";
 import type { ReportView } from "@/lib/report/types";
 import { pluralize } from "@/lib/utils/format";
 
-/** Guest reports expire — docs/PLANNING.md §7.3 (state 25). The account CTA arrives in 11b. */
-export function GuestBanner({ deletesOn }: { deletesOn: string }) {
+const bannerLink =
+  "rounded-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
+/**
+ * Guest reports expire — docs/PLANNING.md §7.3 (state 25). An account keeps them: signing
+ * up or in from here claims this browser's reports and comes back to this one.
+ */
+export function GuestBanner({ deletesOn, next }: { deletesOn: string; next: string }) {
+  const back = encodeURIComponent(next);
   return (
     <div
       role="note"
@@ -15,7 +22,15 @@ export function GuestBanner({ deletesOn }: { deletesOn: string }) {
       <Clock aria-hidden="true" className="mt-1 size-4 shrink-0 text-muted-foreground" />
       <p>
         Guest reports are deleted automatically. This one will be deleted on{" "}
-        <span className="font-medium text-foreground">{deletesOn}</span>.
+        <span className="font-medium text-foreground">{deletesOn}</span>.{" "}
+        <Link href={`/register?next=${back}`} className={bannerLink}>
+          Create a free account
+        </Link>{" "}
+        to keep it, or{" "}
+        <Link href={`/login?next=${back}`} className={bannerLink}>
+          log in
+        </Link>
+        .
       </p>
     </div>
   );

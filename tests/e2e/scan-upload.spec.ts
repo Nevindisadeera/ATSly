@@ -236,9 +236,9 @@ test("the dropzone opens the file chooser from the keyboard", async ({
   isMobile,
 }) => {
   test.skip(isMobile, "Keyboard interaction is covered on desktop.");
-  await dropzone(page).focus();
   const chooser = page.waitForEvent("filechooser");
-  await page.keyboard.press("Enter");
+  // press() focuses and presses on the same element, so a busy page can't move focus between.
+  await dropzone(page).press("Enter");
   const fc = await chooser;
   expect(fc.isMultiple()).toBe(false);
 });

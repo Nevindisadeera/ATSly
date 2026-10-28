@@ -17,3 +17,9 @@ export async function currentOwner(): Promise<Owner | null> {
   const guestId = decodeGuestCookie(store.get(GUEST_COOKIE)?.value);
   return guestId ? { type: "guest", id: guestId } : null;
 }
+
+/** This browser has a guest identity, so it has (or had) reports that signing in would keep. */
+export async function hasGuestIdentity(): Promise<boolean> {
+  const store = await cookies();
+  return decodeGuestCookie(store.get(GUEST_COOKIE)?.value) !== null;
+}

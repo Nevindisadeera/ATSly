@@ -36,7 +36,9 @@ export function ReportView({ view }: { view: ReportViewModel }) {
 
   return (
     <Container width="app" className="py-8 md:py-12">
-      {view.deletesOn ? <GuestBanner deletesOn={view.deletesOn} /> : null}
+      {view.deletesOn ? (
+        <GuestBanner deletesOn={view.deletesOn} next={`/results/${view.scanId}`} />
+      ) : null}
       <div className={view.deletesOn ? "mt-6" : undefined}>
         <ReportHeader view={view} />
       </div>
