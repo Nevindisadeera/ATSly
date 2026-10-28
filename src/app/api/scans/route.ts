@@ -1,6 +1,6 @@
 import { after } from "next/server";
 
-import { resolveOwner } from "@/lib/auth/guest";
+import { resolveOwner } from "@/lib/auth/request-owner";
 import { readJsonBody } from "@/lib/http/body";
 import { AppError } from "@/lib/http/errors";
 import { jsonError, jsonSuccess, newRequestId } from "@/lib/http/respond";
@@ -30,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     // Without an owner cookie there is no resume the caller could own.
-    const resolved = resolveOwner(request);
+    const resolved = await resolveOwner(request);
     if (!resolved) throw new AppError("NOT_FOUND");
 
     const quota = await consumeScanQuota(resolved.owner, clientAddress(request.headers));

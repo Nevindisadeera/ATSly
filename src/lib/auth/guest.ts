@@ -1,11 +1,9 @@
 import "server-only";
 
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { AppError } from "@/lib/http/errors";
 import { logger } from "@/lib/logging/logger";
-
-import type { Owner } from "./owner";
 
 /**
  * Guest identity — docs/PLANNING.md §23. A random id in an HttpOnly cookie, signed with
@@ -70,33 +68,4 @@ export function guestCookieHeader(id: string, secure: boolean): string {
   ]
     .filter(Boolean)
     .join("; ");
-}
-
-export type ResolvedOwner = {
-  owner: Owner;
-  /** Set-Cookie header value when a new guest identity was issued. */
-  setCookie?: string;
-};
-
-/**
- * The owner of a request: the signed guest cookie if present and valid. With `create`, a new
- * guest identity is issued when there is none (or it was tampered with).
- */
-export function resolveOwner(request: Request, options: { create: true }): ResolvedOwner;
-export function resolveOwner(
-  request: Request,
-  options?: { create?: false },
-): ResolvedOwner | null;
-export function resolveOwner(
-  request: Request,
-  options: { create?: boolean } = {},
-): ResolvedOwner | null {
-  const existing = decodeGuestCookie(readCookie(request.headers, GUEST_COOKIE));
-  if (existing) return { owner: { type: "guest", id: existing } };
-  if (!options.create) return null;
-
-  const id = randomUUID();
-  const secure =
-    process.env.NODE_ENV === "production" || new URL(request.url).protocol === "https:";
-  return { owner: { type: "guest", id }, setCookie: guestCookieHeader(id, secure) };
 }

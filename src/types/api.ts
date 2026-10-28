@@ -13,7 +13,9 @@ export type ApiErrorCode =
   | "TOO_MANY_PAGES"
   | "RATE_LIMITED"
   | "UNAUTHENTICATED"
+  | "FORBIDDEN"
   | "NOT_FOUND"
+  | "EMAIL_TAKEN"
   | "SERVICE_UNAVAILABLE"
   | "INTERNAL";
 

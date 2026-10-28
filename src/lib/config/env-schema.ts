@@ -26,6 +26,9 @@ export const envSchema = z.object({
     .optional(),
   /** Secret for signing cookies (Phase 6). At least 32 characters. */
   AUTH_SECRET: z.string().min(32, "must be at least 32 characters").optional(),
+  /** Google sign-in (Phase 11a), enabled only when both are set. */
+  AUTH_GOOGLE_ID: z.string().min(1).optional(),
+  AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
   /** Days before data owned by a guest (no account) is deleted. */
   GUEST_RETENTION_DAYS: z.coerce.number().int().min(1).max(90).default(7),
   /**

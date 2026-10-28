@@ -117,4 +117,17 @@ export const jobDescriptionRepository = {
       );
     });
   },
+  /**
+   * Moves all of one owner's job descriptions to another (a guest signing in) and drops the
+   * guest deletion date. Returns how many moved; running it again moves nothing.
+   */
+  reown(from: Owner, to: Owner): Promise<number> {
+    return withDb(async () => {
+      const result = await JobDescriptionModel.updateMany(ownerFilter(from), {
+        $set: { owner: to },
+        $unset: { expiresAt: 1 },
+      });
+      return result.modifiedCount;
+    });
+  },
 };

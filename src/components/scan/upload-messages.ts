@@ -64,7 +64,9 @@ export function uploadErrorMessage(
       };
     case "INVALID_INPUT":
     case "UNAUTHENTICATED":
+    case "FORBIDDEN":
     case "NOT_FOUND":
+    case "EMAIL_TAKEN":
     case "INTERNAL":
     case "ABORTED":
       return {
