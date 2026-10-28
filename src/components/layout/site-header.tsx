@@ -10,6 +10,7 @@ import { HeaderScrollState } from "./header-scroll-state";
 const NAV = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/methodology", label: "Methodology" },
+  { href: "/login", label: "Log in" },
 ];
 
 /** Marketing header. Transparent at the top of the page; a hairline and solid surface once scrolled. */

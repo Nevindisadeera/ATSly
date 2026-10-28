@@ -13,6 +13,8 @@ export type ClientFailure = {
   retryAfterSeconds?: number;
   /** From X-Request-Id, shown as a reference on unexpected errors. */
   requestId?: string;
+  /** The form field an INVALID_INPUT error is about, when the server says. */
+  field?: string;
 };
 
 const KNOWN_CODES = new Set<ApiErrorCode>([
@@ -25,7 +27,9 @@ const KNOWN_CODES = new Set<ApiErrorCode>([
   "TOO_MANY_PAGES",
   "RATE_LIMITED",
   "UNAUTHENTICATED",
+  "FORBIDDEN",
   "NOT_FOUND",
+  "EMAIL_TAKEN",
   "SERVICE_UNAVAILABLE",
   "INTERNAL",
 ]);
@@ -38,6 +42,7 @@ export function codeForStatus(status: number): ApiErrorCode {
   if (status === 429) return "RATE_LIMITED";
   if (status === 503) return "SERVICE_UNAVAILABLE";
   if (status === 401) return "UNAUTHENTICATED";
+  if (status === 403) return "FORBIDDEN";
   if (status === 400) return "INVALID_INPUT";
   return "INTERNAL";
 }
@@ -64,11 +69,16 @@ export function errorFromBody(body: unknown): ApiErrorBody["error"] | null {
   if (typeof body !== "object" || body === null || !("error" in body)) return null;
   const error = (body as { error: unknown }).error;
   if (typeof error !== "object" || error === null) return null;
-  const { code, message } = error as { code?: unknown; message?: unknown };
+  const { code, message, details } = error as {
+    code?: unknown;
+    message?: unknown;
+    details?: unknown;
+  };
   if (typeof code !== "string" || !KNOWN_CODES.has(code as ApiErrorCode)) return null;
   return {
     code: code as ApiErrorCode,
     message: typeof message === "string" ? message : "",
+    ...(details !== undefined ? { details } : {}),
   };
 }
 
@@ -80,6 +90,7 @@ export function failureFrom(
 ): ClientFailure {
   const apiError = errorFromBody(body);
   const retryAfter = Number(headers?.get("retry-after"));
+  const field = (apiError?.details as { field?: unknown } | undefined)?.field;
   return {
     ok: false,
     status,
@@ -88,5 +99,6 @@ export function failureFrom(
     retryAfterSeconds:
       Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
     requestId: headers?.get("x-request-id") ?? undefined,
+    ...(typeof field === "string" ? { field } : {}),
   };
 }
