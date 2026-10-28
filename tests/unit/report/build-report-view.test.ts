@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { mergeRecommendations } from "@/lib/ai/recommendations";
 import { runAtsEngine } from "@/lib/ats";
-import { runMatchEngine, type JobRequirements } from "@/lib/matching";
+import {
+  runMatchEngine,
+  type JobRequirements,
+  type SemanticAssessment,
+} from "@/lib/matching";
 import type { ParsedResume } from "@/lib/parsing";
 import { buildReportView, topActions } from "@/lib/report/build-report-view";
 import { summarizeAts } from "@/lib/services/scan-pipeline";
@@ -181,6 +186,34 @@ describe("buildReportView", () => {
     expect(buildReportView(scanOf(d), resume).parsed!.otherSections).toEqual(["Awards"]);
   });
 
+  it("links top actions to their recommendations, or to the check without one", () => {
+    const scan = scanOf(flawed());
+    const withRecommendations: ScanDetail = {
+      ...scan,
+      ai: {
+        status: "complete",
+        skippedReason: null,
+        contentQuality: 60,
+        recommendations: mergeRecommendations({ ats: scan.ats! }),
+      },
+    };
+    const view = buildReportView(withRecommendations, null);
+    const first = view.recommendations.items.find(
+      (r) => r.checkAnchor === `check-${scan.ats!.issues[0]!.id}`,
+    )!;
+    expect(view.topActions[0]!.anchor).toBe(first.anchor);
+    expect(view.topActions.every((a) => a.anchor.startsWith("recommendation-"))).toBe(
+      true,
+    );
+
+    // Reports from before recommendations keep pointing at the checks.
+    const legacy = buildReportView(scan, null);
+    expect(legacy.topActions.every((a) => a.anchor.startsWith("check-"))).toBe(true);
+    expect(legacy.recommendations.empty?.title).toBe(
+      "No recommendations were saved with this report",
+    );
+  });
+
   it("refuses a scan that isn't complete", () => {
     const scan = { ...scanOf(draft()), status: "running" as const };
     expect(() => buildReportView(scan, null)).toThrow();
@@ -278,6 +311,100 @@ describe("job match view", () => {
     expect(buildReportView(scanOf(draft()), d.parsed)).toMatchObject({
       job: null,
       match: null,
+    });
+  });
+
+  describe("with AI review", () => {
+    const assessment: SemanticAssessment = {
+      coverage: [
+        {
+          requirement: "Rust",
+          covered: "yes",
+          evidence:
+            "Reduced cloud costs by $120,000 a year by right-sizing Kubernetes clusters",
+          confidence: "high",
+        },
+        {
+          requirement: "Scala",
+          covered: "partial",
+          evidence:
+            "Built a Python data pipeline on AWS that processes 2 million events per day",
+          confidence: "medium",
+        },
+      ],
+      responsibilityAlignment: {
+        score: 80,
+        strong: [
+          {
+            responsibility: "Own backend services end to end",
+            evidence:
+              "Designed TypeScript services on Node.js that 30 partner teams rely on",
+          },
+        ],
+        weak: [
+          { responsibility: "Mentor engineers", reason: "No mentoring is described." },
+        ],
+      },
+      honestyFlags: [],
+    };
+
+    function aiScan(status: "complete" | "partial" | "failed" | "skipped") {
+      const d = draft();
+      const match = runMatchEngine({ resume: d.parsed, job, assessment });
+      const scan = scanOf(d);
+      const detail: ScanDetail = {
+        ...scan,
+        job: { id: "6ad85378fe232d218e42742a", title: null, company: null },
+        match,
+        summary: summarizeAts(scan.ats!, match),
+        ai: {
+          status,
+          skippedReason: status === "skipped" ? "disabled" : null,
+          contentQuality: null,
+          recommendations: [],
+        },
+      };
+      return { d, scan: detail };
+    }
+
+    it("labels AI matches, partial ones too, and locates their evidence", () => {
+      const { scan, d } = aiScan("complete");
+      const view = buildReportView(scan, d.parsed).match!;
+      expect(view.matchedRequired.find((t) => t.term === "Rust")).toMatchObject({
+        how: "Matched by AI",
+        byAi: true,
+        partial: false,
+        location: "Experience › Northwind Payments › bullet 3",
+      });
+      expect(view.matchedPreferred.find((t) => t.term === "Scala")).toMatchObject({
+        how: "Partly matched by AI",
+        byAi: true,
+        partial: true,
+      });
+      expect(view.matchedRequired.find((t) => t.term === "Python")).toMatchObject({
+        byAi: false,
+        partial: false,
+      });
+      expect(view.strongMatches).toEqual([
+        {
+          requirement: "Own backend services end to end",
+          evidence:
+            "Designed TypeScript services on Node.js that 30 partner teams rely on",
+          location: "Experience › Contoso Retail › bullet 1",
+        },
+      ]);
+      expect(view.precisionNote).toBeNull();
+    });
+
+    it("notes reduced precision when AI review failed or didn't run", () => {
+      const partial = aiScan("partial");
+      expect(
+        buildReportView(partial.scan, partial.d.parsed).match!.precisionNote,
+      ).toMatch(/^Part of the AI review didn't finish/);
+      const skipped = aiScan("skipped");
+      expect(
+        buildReportView(skipped.scan, skipped.d.parsed).match!.precisionNote,
+      ).toMatch(/^Matched on exact names and known related terms only/);
     });
   });
 });

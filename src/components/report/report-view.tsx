@@ -8,9 +8,9 @@ import { ParsedResumeSection } from "./parsed-resume-section";
 import { ReportFooter } from "./report-footer";
 import { GuestBanner, ReportHeader } from "./report-header";
 import { ReportNav, type ReportNavItem } from "./report-nav";
-import { ScoreBreakdown } from "./score-breakdown";
 import { JobMatchSection } from "./job-match-section";
-import { RecommendationsSection } from "./upcoming-sections";
+import { RecommendationsSection } from "./recommendations-section";
+import { ScoreBreakdown } from "./score-breakdown";
 
 /** The complete results page — docs/PLANNING.md §7.3. */
 export function ReportView({ view }: { view: ReportViewModel }) {
@@ -24,7 +24,13 @@ export function ReportView({ view }: { view: ReportViewModel }) {
       label: "Job match",
       badge: view.match ? String(view.match.score) : undefined,
     },
-    { id: "recommendations", label: "Recommendations" },
+    {
+      id: "recommendations",
+      label: "Recommendations",
+      badge: view.recommendations.items.length
+        ? String(view.recommendations.items.length)
+        : undefined,
+    },
     { id: "parsed-resume", label: "Parsed resume" },
   ];
 
@@ -45,7 +51,7 @@ export function ReportView({ view }: { view: ReportViewModel }) {
           <IssuesSection groups={view.issueGroups} issueTotal={view.issueTotal} />
           <KeywordsSection keywords={view.keywords} />
           <JobMatchSection view={view} />
-          <RecommendationsSection />
+          <RecommendationsSection recommendations={view.recommendations} />
           <ParsedResumeSection parsed={view.parsed} />
           <ReportFooter engineVersion={view.engineVersion} />
         </div>

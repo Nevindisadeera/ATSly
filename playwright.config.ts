@@ -35,6 +35,8 @@ export default defineConfig({
         MONGODB_URI: process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/atsly",
         AUTH_SECRET:
           process.env.AUTH_SECRET ?? "e2e-only-secret-for-signing-cookies-0123456789",
+        // The deterministic offline provider, so tests never call (or pay for) a real model.
+        AI_PROVIDER: process.env.AI_PROVIDER ?? "mock",
       },
     },
   ],

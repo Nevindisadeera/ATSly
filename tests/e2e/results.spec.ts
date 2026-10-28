@@ -74,21 +74,35 @@ test("analyzes an uploaded resume and shows the full report", async ({ page }) =
   // Parsed contact details are open by default.
   await expect(page.locator("#parsed-resume")).toContainText("@");
   await expect(page.getByText(/^Engine v\d+\.\d+\.\d+/)).toBeVisible();
+  // Recommendations come with the report, with the accuracy disclaimer.
+  const recommendations = page.locator("#recommendations");
+  await expect(recommendations.getByRole("article").first()).toBeVisible();
+  await expect(recommendations).toContainText(
+    "Suggestions are generated from your own content. Verify accuracy before using them.",
+  );
 
   await expectNoAxeViolations(page);
 });
 
-test("top actions open the issue they point to", async ({ page }) => {
+test("top actions open their recommendation, which leads to the check", async ({
+  page,
+}) => {
   await page.goto("/scan");
   const resumeId = await uploadResume(page);
   const scanId = await completedScan(page, resumeId);
   await page.goto(`/results/${scanId}`);
 
-  const action = page.locator('#overview ol a[href^="#check-"]').first();
+  const action = page.locator("#overview ol a").first();
   const anchor = (await action.getAttribute("href"))!.slice(1);
+  expect(anchor).toMatch(/^recommendation-/);
   await action.click();
+  const card = page.locator(`#${anchor}`);
+  await expect(card).toBeInViewport();
 
-  const row = page.locator(`#${anchor}`);
+  const toCheck = card.getByRole("link", { name: /^See the check/ });
+  const check = (await toCheck.getAttribute("href"))!.slice(1);
+  await toCheck.click();
+  const row = page.locator(`#${check}`);
   await expect(row.getByRole("button").first()).toHaveAttribute("aria-expanded", "true");
   await expect(row.getByText("How to fix")).toBeVisible();
 });
@@ -141,6 +155,10 @@ test("shows live progress, then the report once the scan completes", async ({
   ).toBeVisible(SERVER);
   await expect(page.getByRole("status")).toHaveText("Reading your resume…");
   await expect(page.getByText("Usually under 30 seconds.")).toBeVisible();
+  // AI review is configured (the mock provider), so its step is shown.
+  await expect(page.getByRole("list", { name: "Analysis steps" })).toContainText(
+    "Evaluating content",
+  );
   await expectNoAxeViolations(page);
 
   await updateScan(scanId, { status: "running", stage: "ats_rules" });
