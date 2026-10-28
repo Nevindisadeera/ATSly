@@ -86,3 +86,17 @@ test("Open Graph image renders as a PNG", async ({ page, request }) => {
   expect(image.status()).toBe(200);
   expect(image.headers()["content-type"]).toBe("image/png");
 });
+
+test("unknown pages show a helpful 404", async ({ page }) => {
+  const response = await page.goto("/no-such-page");
+  expect(response?.status()).toBe(404);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "This page doesn't exist." }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Scan a resume" })).toHaveAttribute(
+    "href",
+    "/scan",
+  );
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});

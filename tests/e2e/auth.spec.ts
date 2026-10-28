@@ -148,3 +148,30 @@ for (const path of ["/login", "/register"]) {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 }
+
+test("signs in with the keyboard alone", async ({ page }) => {
+  const email = uniqueEmail();
+  const created = await page.request.post("/api/auth/register", {
+    data: { name: "Kay Board", email, password: PASSWORD },
+  });
+  expect(created.status()).toBe(201);
+
+  await page.goto("/login?next=%2Fsettings");
+  await expect(page.getByRole("heading", { level: 1, name: "Log in" })).toBeVisible(
+    SERVER,
+  );
+  const emailField = page.getByLabel("Email");
+  // Skip link, logo, then the first field.
+  for (let i = 0; i < 6; i++) {
+    if (await emailField.evaluate((el) => el === document.activeElement)) break;
+    await page.keyboard.press("Tab");
+  }
+  await expect(emailField).toBeFocused();
+  await page.keyboard.type(email);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Password", { exact: true })).toBeFocused();
+  await page.keyboard.type(PASSWORD);
+  await page.keyboard.press("Enter");
+  await page.waitForURL("**/settings", SERVER);
+  await expect(page.getByRole("heading", { level: 1, name: "Settings" })).toBeVisible();
+});
