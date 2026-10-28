@@ -20,6 +20,7 @@ import { AnalysisFailed } from "./analysis-failed";
 type AnalysisProgressProps = {
   scanId: string;
   resumeId: string;
+  jobDescriptionId?: string;
   fileName: string;
   initial: ScanStatusResult;
   steps: ProgressStepKey[];
@@ -32,6 +33,7 @@ type AnalysisProgressProps = {
 export function AnalysisProgress({
   scanId,
   resumeId,
+  jobDescriptionId,
   fileName,
   initial,
   steps,
@@ -49,6 +51,7 @@ export function AnalysisProgress({
       <AnalysisFailed
         code={state.error?.code ?? "INTERNAL"}
         resumeId={resumeId}
+        jobDescriptionId={jobDescriptionId}
         fileName={fileName}
       />
     );

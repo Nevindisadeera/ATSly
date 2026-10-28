@@ -195,19 +195,14 @@ export function buildRecommendationsView(input: {
   ai: ScanAiDetail | null;
   resume: ParsedResume | null;
   resumeId: string;
-  hasJob: boolean;
+  /** The saved job description the scan was matched against, if any. */
+  jobDescriptionId: string | null;
 }): RecommendationsView {
   const { ai, resume } = input;
-  // Retrying needs the resume; with a job, the posting has to be pasted again.
-  const retry: RetryView | null = !resume
-    ? null
-    : input.hasJob
-      ? {
-          kind: "link",
-          href: `/scan?resume=${encodeURIComponent(input.resumeId)}`,
-          hint: "Paste the job description again to include job matching.",
-        }
-      : { kind: "scan", resumeId: input.resumeId };
+  // Retrying needs the resume; the job description is reused as it was saved.
+  const retry: RetryView | null = resume
+    ? { resumeId: input.resumeId, jobDescriptionId: input.jobDescriptionId }
+    : null;
 
   const locate = quoteLocator(resume);
   const items = (ai?.recommendations ?? []).map((rec) => toView(rec, resume, locate));

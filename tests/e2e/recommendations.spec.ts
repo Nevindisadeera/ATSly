@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
@@ -195,6 +198,41 @@ test("explains AI review that didn't finish, and retries it", async ({ page }) =
   await expect(
     page.getByRole("heading", { level: 2, name: "Recommendations" }),
   ).toBeVisible(SERVER);
+});
+
+test("retrying a job scan keeps the job", async ({ page }) => {
+  await page.goto("/scan");
+  const resumeId = await uploadResume(page);
+  const created = await page.request.post("/api/scans", {
+    data: {
+      resumeId,
+      jobDescription: {
+        text: readFileSync(
+          join(process.cwd(), "tests/fixtures/jobs/backend-engineer.txt"),
+          "utf8",
+        ),
+        title: "Backend Engineer",
+      },
+    },
+  });
+  const scanId = (await created.json()).data.scanId as string;
+  await expect
+    .poll(
+      async () =>
+        (await (await page.request.get(`/api/scans/${scanId}/status`)).json()).data
+          .status,
+      SERVER,
+    )
+    .toBe("complete");
+  await updateScan(scanId, { "ai.status": "failed" });
+
+  await page.goto(`/results/${scanId}`);
+  await page
+    .locator("#recommendations")
+    .getByRole("button", { name: "Try again" })
+    .click();
+  await page.waitForURL((url) => !url.pathname.endsWith(scanId), SERVER);
+  await expect(page.getByText(/Matched against\s*Backend Engineer/)).toBeVisible(SERVER);
 });
 
 test("explains a paused AI review and reports from before recommendations", async ({

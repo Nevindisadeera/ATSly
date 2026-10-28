@@ -159,9 +159,8 @@ export type RecommendationView = {
   related: { href: string; label: string } | null;
 };
 
-/** How to run the analysis again: a new scan of the same resume, or the scan page. */
-export type RetryView =
-  { kind: "scan"; resumeId: string } | { kind: "link"; href: string; hint: string };
+/** How to run the analysis again: a new scan of the same resume, against the same job. */
+export type RetryView = { resumeId: string; jobDescriptionId: string | null };
 
 export type RecommendationsNotice = {
   /** warning: something failed. info: AI didn't run, by design or because of a limit. */

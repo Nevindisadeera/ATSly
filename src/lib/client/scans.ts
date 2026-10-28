@@ -9,11 +9,18 @@ export type JobDescriptionPayload = { text: string; title?: string; company?: st
 
 export function startScan(
   resumeId: string,
-  options: { jobDescription?: JobDescriptionPayload; signal?: AbortSignal } = {},
+  options: {
+    jobDescription?: JobDescriptionPayload;
+    /** Scan again against a job description pasted before. */
+    jobDescriptionId?: string;
+    signal?: AbortSignal;
+  } = {},
 ): Promise<ClientOutcome<CreateScanResult>> {
   const body = options.jobDescription
     ? { resumeId, jobDescription: options.jobDescription }
-    : { resumeId };
+    : options.jobDescriptionId
+      ? { resumeId, jobDescriptionId: options.jobDescriptionId }
+      : { resumeId };
   return requestJson<CreateScanResult>("/api/scans", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

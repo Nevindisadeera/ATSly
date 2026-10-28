@@ -101,7 +101,7 @@ describe("placeholdersIn", () => {
 
 describe("buildRecommendationsView", () => {
   const resume = draft().parsed;
-  const base = { resume, resumeId: RESUME_ID, hasJob: false };
+  const base = { resume, resumeId: RESUME_ID, jobDescriptionId: null };
 
   it("lists recommendations with their location, check and placeholders", () => {
     const view = buildRecommendationsView({
@@ -168,7 +168,7 @@ describe("buildRecommendationsView", () => {
     expect(view.notice).toMatchObject({
       tone: "warning",
       title: "Some recommendations are temporarily unavailable.",
-      retry: { kind: "scan", resumeId: RESUME_ID },
+      retry: { resumeId: RESUME_ID, jobDescriptionId: null },
     });
     expect(view.notice!.body).toContain("Your scores aren't affected.");
     expect(view.items).toHaveLength(1);
@@ -180,16 +180,15 @@ describe("buildRecommendationsView", () => {
     expect(view.empty).toBeNull();
   });
 
-  it("sends a retry with a job to the scan page, and offers none without the resume", () => {
+  it("retries against the same saved job, and offers no retry without the resume", () => {
     const withJob = buildRecommendationsView({
       ...base,
-      hasJob: true,
+      jobDescriptionId: "6ad85378fe232d218e42742a",
       ai: ai({ status: "failed" }),
     });
     expect(withJob.notice!.retry).toEqual({
-      kind: "link",
-      href: `/scan?resume=${RESUME_ID}`,
-      hint: "Paste the job description again to include job matching.",
+      resumeId: RESUME_ID,
+      jobDescriptionId: "6ad85378fe232d218e42742a",
     });
 
     const gone = buildRecommendationsView({
@@ -232,7 +231,7 @@ describe("buildRecommendationsView", () => {
       expect(view.notice).toBeNull();
       expect(view.empty).toMatchObject({
         title: "No recommendations were saved with this report",
-        retry: { kind: "scan", resumeId: RESUME_ID },
+        retry: { resumeId: RESUME_ID, jobDescriptionId: null },
       });
     }
   });

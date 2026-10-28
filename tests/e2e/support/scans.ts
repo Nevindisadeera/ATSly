@@ -117,3 +117,52 @@ export async function completeLike(scanId: string, sourceScanId: string) {
     durationMs: source.durationMs,
   });
 }
+
+/** The signed-in account's id, from the browser's session. */
+export async function sessionUserId(page: Page): Promise<string> {
+  const session = await (await page.request.get("/api/auth/session")).json();
+  if (!session?.user?.id) throw new Error("Not signed in.");
+  return session.user.id as string;
+}
+
+/**
+ * Complete scans for an account, written straight to the database: lists and stats read
+ * only their summaries. Newest first, one minute apart; ATS scores rise toward the newest.
+ */
+export async function seedUserScans(
+  userId: string,
+  count: number,
+  options: { matchEvery?: number } = {},
+): Promise<string[]> {
+  const scans = (await db()).collection("scans");
+  const now = Date.now();
+  const resumeId = new mongoose.Types.ObjectId();
+  const docs = Array.from({ length: count }, (_, i) => {
+    const createdAt = new Date(now - (i + 1) * 60_000);
+    const withMatch = options.matchEvery !== undefined && i % options.matchEvery === 0;
+    return {
+      owner: { type: "user", id: userId },
+      resumeId,
+      status: "complete",
+      stage: null,
+      engineVersion: "1.1.0",
+      resumeSnapshot: {
+        fileName: `seeded-${count - i}.pdf`,
+        pageCount: 1,
+        wordCount: 300,
+      },
+      summary: {
+        headline: "Strong structure.",
+        atsScore: 90 - i,
+        atsBand: "good",
+        topActions: ["Add dates to every role"],
+        issueCounts: { critical: 0, major: 1, minor: 1 },
+        ...(withMatch ? { matchScore: 60 + (i % 10), matchBand: "moderate" } : {}),
+      },
+      createdAt,
+      updatedAt: createdAt,
+    };
+  });
+  const result = await scans.insertMany(docs);
+  return Object.values(result.insertedIds).map(String);
+}

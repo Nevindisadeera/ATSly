@@ -56,6 +56,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[id]">
         <AnalysisFailed
           code={scan.error?.code ?? "INTERNAL"}
           resumeId={scan.resume.id}
+          jobDescriptionId={scan.job?.id}
           fileName={scan.resume.fileName}
         />
       </Container>
@@ -68,6 +69,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[id]">
         <AnalysisProgress
           scanId={scan.id}
           resumeId={scan.resume.id}
+          jobDescriptionId={scan.job?.id}
           fileName={scan.resume.fileName}
           initial={{
             status: scan.status,
