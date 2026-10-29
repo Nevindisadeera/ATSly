@@ -3,7 +3,7 @@
  * schemas: it's part of every cache key and stored on each scan.
  */
 
-export const PROMPT_VERSION = "1.0.0";
+export const PROMPT_VERSION = "1.0.1";
 
 /** Shared system prompt (§21, V1 text). */
 export const SYSTEM_PROMPT = [

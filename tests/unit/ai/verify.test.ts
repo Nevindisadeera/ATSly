@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { compactResume, jobDescriptionInput, MAX_RESUME_CHARS } from "@/lib/ai/inputs";
@@ -18,6 +21,7 @@ import {
   verifyMatchAssessment,
   verifyQuote,
 } from "@/lib/ai/verify";
+import { extractJobRequirements } from "@/lib/matching";
 
 import { cleanResume, role } from "../../support/ats";
 
@@ -203,6 +207,22 @@ describe("inputs", () => {
     expect(input.startsWith("Requirements\n5+ years of Go")).toBe(true);
     expect(input).not.toContain("Free lunch");
     expect(input).not.toContain("equal opportunity");
+  });
+
+  it("keeps the job title on top, out of the responsibilities", () => {
+    const posting = readFileSync(
+      join(process.cwd(), "tests/fixtures/jobs/backend-engineer.txt"),
+      "utf8",
+    );
+    const input = jobDescriptionInput(posting);
+    expect(input.startsWith("Senior Backend Engineer\n\n")).toBe(true);
+    // Read again, as the AI and the mock provider read it.
+    const reread = extractJobRequirements(input);
+    expect(reread.jobTitle).toBe("Senior Backend Engineer");
+    expect(reread.responsibilities).not.toContain("Senior Backend Engineer");
+    expect(reread.responsibilities).toEqual(
+      extractJobRequirements(posting).responsibilities,
+    );
   });
 
   it("frames the data as untrusted", () => {
