@@ -21,7 +21,7 @@ jobs:
       # Integration tests start an in-memory MongoDB; keep its binary between runs.
       MONGOMS_DOWNLOAD_DIR: /home/runner/.cache/mongodb-binaries
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v5
         with:
@@ -65,7 +65,7 @@ jobs:
       AUTH_SECRET: ci-only-secret-for-signing-cookies-0123456789
       AI_PROVIDER: mock
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v5
         with:
@@ -108,7 +108,7 @@ jobs:
       MONGOMS_DISABLE_POSTINSTALL: "1"
       AUTH_SECRET: ci-only-secret-for-signing-cookies-0123456789
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v5
         with:
