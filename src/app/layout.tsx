@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { GeistSans } from "geist/font/sans";
 import { site } from "@/lib/config/site";
 
@@ -30,7 +31,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${GeistSans.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        {/* Cookieless page-view counts on Vercel only (see the privacy page). */}
+        {process.env.VERCEL === "1" ? <Analytics /> : null}
+      </body>
     </html>
   );
 }

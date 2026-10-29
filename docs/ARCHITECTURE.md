@@ -105,14 +105,16 @@ indistinguishable from one that doesn't exist; both return 404.
 
 ## Request safety
 
-| Concern       | Where                                           | What                                                                                                                                                                     |
-| ------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| CSRF          | `src/proxy.ts`, `lib/security/proxy-rules.ts`   | Cross-site `POST/PUT/PATCH/DELETE` to `/api/*` get 403 (Auth.js checks its own token)                                                                                    |
-| Account pages | `src/proxy.ts`                                  | Signed-out visitors to `/dashboard` and `/settings` go to `/login?next=`; `next` must be a path on this site                                                             |
-| Rate limits   | `lib/security`                                  | Fixed windows in MongoDB, shared by every instance: uploads per network, scans per guest, user and network, sign-ups per network, sign-in attempts per email and network |
-| Files         | `lib/security/file-signature.ts`, `lib/parsing` | Extension, MIME and magic-byte checks, 4 MB and 10 pages, ZIP bomb limits, encrypted PDFs refused                                                                        |
-| Input         | `lib/validation`                                | Zod schemas on every body and query; unknown fields rejected                                                                                                             |
-| Logs          | `lib/logging`                                   | One JSON line per event with ids, codes and counts, never resume or job text                                                                                             |
+| Concern         | Where                                                       | What                                                                                                                                                                     |
+| --------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CSRF            | `src/proxy.ts`, `lib/security/proxy-rules.ts`               | Cross-site `POST/PUT/PATCH/DELETE` to `/api/*` get 403 (Auth.js checks its own token)                                                                                    |
+| Account pages   | `src/proxy.ts`                                              | Signed-out visitors to `/dashboard` and `/settings` go to `/login?next=`; `next` must be a path on this site                                                             |
+| Rate limits     | `lib/security`                                              | Fixed windows in MongoDB, shared by every instance: uploads per network, scans per guest, user and network, sign-ups per network, sign-in attempts per email and network |
+| Files           | `lib/security/file-signature.ts`, `lib/parsing`             | Extension, MIME and magic-byte checks, 4 MB and 10 pages, ZIP bomb limits, encrypted PDFs refused                                                                        |
+| Input           | `lib/validation`                                            | Zod schemas on every body and query; unknown fields rejected                                                                                                             |
+| Headers and CSP | `next.config.ts`, `src/proxy.ts`, `lib/security/headers.ts` | HSTS, nosniff, frame denial and a base CSP on every response; a per-request nonce CSP on dynamic pages, in production                                                    |
+| Errors          | `src/instrumentation.ts`                                    | Server errors logged with their digest; missing production configuration logged at start-up                                                                              |
+| Logs            | `lib/logging`                                               | One JSON line per event with ids, codes and counts, never resume or job text                                                                                             |
 
 ## AI guardrails
 
