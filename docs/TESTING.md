@@ -51,7 +51,7 @@ not unit tests.
 
 ## End-to-end suite
 
-87 tests, each run on desktop and mobile (174 runs; 15 are skipped by design where an
+88 tests, each run on desktop and mobile (176 runs; 15 are skipped by design where an
 interaction only applies to one form factor):
 
 - **Upload** (`scan-upload*.spec.ts`): every client and server error state, drag and drop,
@@ -65,6 +65,8 @@ interaction only applies to one form factor):
 - **Dashboard and settings** (`dashboard.spec.ts`): empty state, stats, the score trend by
   keyboard and as a table, paging, deleting a report, deleting all data and the account.
 - **Marketing** (`marketing.spec.ts`): every public page, the 404 page, metadata routes.
+- **Security** (`security.spec.ts`): security headers, a fresh CSP nonce per request on
+  dynamic pages, and no CSP violations while scanning and signing in (production builds).
 
 axe-core runs with no allowed violations on the landing, methodology, privacy, terms, scan,
 results, login, register, dashboard, settings and 404 pages, and every main page is checked

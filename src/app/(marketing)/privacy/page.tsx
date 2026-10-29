@@ -78,6 +78,10 @@ export default function PrivacyPage() {
         We use only the cookies needed for ATSly to work: one that keeps you signed in,
         and one that links scans to your browser when you use ATSly without an account.
       </p>
+      <p>
+        To see which pages are used, we count page views with Vercel Web Analytics, which
+        uses no cookies and doesn&apos;t identify you or follow you across sites.
+      </p>
 
       <h2 id="your-choices">Your choices</h2>
       <p>

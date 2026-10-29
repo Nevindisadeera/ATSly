@@ -1,0 +1,28 @@
+name: Uptime
+
+# Checks the production health endpoint every 30 minutes. Set the repository variable
+# PRODUCTION_URL (Settings → Secrets and variables → Actions → Variables) to enable it;
+# a failed run notifies the repository's watchers. See docs/DEPLOYMENT.md.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    name: GET /api/health
+    if: vars.PRODUCTION_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check the health endpoint
+        env:
+          URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          status=$(curl --silent --max-time 20 --output response.json --write-out "%{http_code}" "$URL/api/health" || echo "000")
+          echo "HTTP $status"
+          cat response.json 2>/dev/null || true
+          test "$status" = "200"

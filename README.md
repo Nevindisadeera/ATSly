@@ -165,16 +165,22 @@ docs/                   planning, architecture, scoring, matching, API, design, 
 
 ## Testing and quality
 
-- **648 unit and integration tests** cover the engines, services and API routes against a
+- **653 unit and integration tests** cover the engines, services and API routes against a
   real (in-memory) MongoDB. `src/lib` has 96.7 % line coverage, and the ATS and matching
   engines are held to 95 %.
-- **87 Playwright tests**, each on desktop and mobile, cover every user flow, with axe-core
+- **88 Playwright tests**, each on desktop and mobile, cover every user flow, with axe-core
   accessibility checks on every page and layout checks at 320px.
 - **AI evals** check schema validity, evidence verification and recall.
 - **CI** runs typecheck, lint, format, coverage, the build, the E2E suite against a
   production build, and Lighthouse (accessibility, best practices and SEO are enforced).
 
 See [`docs/TESTING.md`](docs/TESTING.md).
+
+## Deployment
+
+ATSly runs on Vercel with MongoDB Atlas. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) covers
+the Atlas and Vercel setup, every production variable, Google sign-in, security headers,
+monitoring, and the launch checklist.
 
 ## Roadmap
 
@@ -201,6 +207,8 @@ example `feat(matching): …`. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
   provider not to store them (`store: false`).
 - Passwords are hashed with bcrypt; sessions are signed JWTs in HttpOnly cookies; every
   query is scoped to its owner; cross-site API writes are refused.
+- Strict security headers on every response, and a per-request nonce Content Security
+  Policy on every page that shows personal data.
 
 Please report vulnerabilities privately as described in [`SECURITY.md`](SECURITY.md).
 
